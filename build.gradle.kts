@@ -45,7 +45,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "com.github.human-sandy"
             artifactId = "3dbinpacking"
-            version = "v0.2"
+            version = "0.1"
 
             from(components["java"])
         }
