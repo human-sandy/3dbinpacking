@@ -8,7 +8,7 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    `maven-publish`
+    id("maven-publish")
 }
 
 group = "me.sandy"
@@ -42,10 +42,10 @@ tasks.withType<Test> {
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
+        register<MavenPublication>("maven") {
             groupId = "com.github.human-sandy"
             artifactId = "3dbinpacking"
-            version = "0.1"
+            version = "0.3"
 
             from(components["java"])
         }
