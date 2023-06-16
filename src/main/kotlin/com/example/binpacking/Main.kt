@@ -3,11 +3,11 @@ package com.example.binpacking
 import com.example.binpacking.domain.*
 import kotlin.random.Random
 
-fun main(args: Array<String>) {
+fun main() {
     val workGroupList: MutableList<WorkGroupInfo> = createWorkGroup()
 
     val toteList: MutableList<MutableList<Picking>> = mutableListOf()
-    var index: Int = 0
+    var index = 0
 
     for (workGroup in workGroupList) {
         val packingResult = createPicking(workGroup)
@@ -39,8 +39,8 @@ fun main(args: Array<String>) {
 }
 
 fun createWorkGroup(): MutableList<WorkGroupInfo> {
-    var workGroupList : MutableList<WorkGroupInfo> = mutableListOf()
-    var skuList : MutableList<SkuInfo> = mutableListOf()
+    val workGroupList : MutableList<WorkGroupInfo> = mutableListOf()
+    val skuList : MutableList<SkuInfo> = mutableListOf()
 
     val apple = SkuInfo(skuUid = "apple", quantity = 0, locationCode = "a-01-01",
         cbmw = CbmwInfo(width=180.0, height=100.0, depth=80.0, weight=30.0)

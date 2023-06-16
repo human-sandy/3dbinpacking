@@ -27,7 +27,7 @@ class Packing {
     }
 
     private fun checkFit(tote: Tote, item: Item): Boolean {
-        var fitted: Boolean = false
+        var fitted = false
         val axisInfo = Axis()
 
         if (tote.items.size == 0) {
@@ -44,7 +44,7 @@ class Packing {
 
         else {
             for (axis in 0..3) {
-                var itemsInTote = tote.items
+                val itemsInTote = tote.items
 
                 for (itemInTote in itemsInTote) {
                     var pivot = mutableListOf(0, 0, 0)
@@ -53,23 +53,22 @@ class Packing {
                     val h = dimension[1]
                     val d = dimension[2]
 
-                    if (axis == axisInfo.WIDTH)
-                        pivot = mutableListOf(
+                    when (axis) {
+                        axisInfo.WIDTH -> pivot = mutableListOf(
                             itemInTote.position[0] + w.toInt(),
                             itemInTote.position[1],
                             itemInTote.position[2])
-                    else if (axis == axisInfo.HEIGHT)
-                        pivot = mutableListOf(
+                        axisInfo.HEIGHT -> pivot = mutableListOf(
                             itemInTote.position[0],
                             itemInTote.position[1] + h.toInt(),
                             itemInTote.position[2]
                         )
-                    else if (axis == axisInfo.DEPTH)
-                        pivot = mutableListOf(
+                        axisInfo.DEPTH -> pivot = mutableListOf(
                             itemInTote.position[0],
                             itemInTote.position[1],
                             itemInTote.position[2] + d.toInt()
                         )
+                    }
 
                     if (tote.putItem(item, pivot)) {
                         fitted = true

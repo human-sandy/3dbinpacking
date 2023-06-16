@@ -29,7 +29,7 @@ class Tote(name: String, width: Double, height: Double, depth: Double, maxWeight
     }
 
     fun getTotalWeight(): Double {
-        var totalWeight: Double = 0.0
+        var totalWeight = 0.0
 
         for (item in this.items) {
             totalWeight += item.weight
@@ -40,7 +40,7 @@ class Tote(name: String, width: Double, height: Double, depth: Double, maxWeight
 
     fun putItem(item: Item, pivot: MutableList<Int>): Boolean {
         val rotationType = RotationType()
-        var fit: Boolean = false
+        var fit = false
         val validItemPosition = item.position
         item.position = pivot
 
