@@ -110,8 +110,8 @@ class Packing {
             item.formatNumbers(numberOfDecimals)
 
         if (biggerFirst)
-            this.items.reversed()
-        this.items.sortedWith(compareBy({ it.itemId }, { it.getVolume() }))
+            this.items = this.items.reversed().toMutableList()
+        this.items = this.items.sortedWith(compareBy({ it.itemId }, { it.getVolume() })).toMutableList()
 
         this.addTote()
 

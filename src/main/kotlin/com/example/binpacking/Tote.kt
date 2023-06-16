@@ -44,7 +44,7 @@ class Tote(name: String, width: Double, height: Double, depth: Double, maxWeight
         val validItemPosition = item.position
         item.position = pivot
 
-        for (i in 0 .. rotationType.ALL.size) {
+        for (i in 0 until rotationType.ALL.size) {
             item.rotationType = i
             val dimension = item.getDimension()
 
