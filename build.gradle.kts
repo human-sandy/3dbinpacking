@@ -43,9 +43,11 @@ tasks.withType<Test> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "com.bin-packing"
-            artifactId = "bin-packing"
-            version = "v0.1"
+            groupId = "com.github.human-sandy"
+            artifactId = "3dbinpacking"
+            version = "v0.2"
+
+            from(components["java"])
         }
     }
 }
