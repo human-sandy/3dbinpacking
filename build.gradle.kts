@@ -7,6 +7,8 @@ plugins {
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
+
+    `maven-publish`
 }
 
 group = "me.sandy"
@@ -36,4 +38,14 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.bin-packing"
+            artifactId = "bin-packing"
+            version = "v0.1"
+        }
+    }
 }
