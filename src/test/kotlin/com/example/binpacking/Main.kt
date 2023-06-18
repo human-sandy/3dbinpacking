@@ -39,17 +39,20 @@ fun main() {
 }
 
 fun createWorkGroup(): MutableList<WorkGroupInfo> {
-    val workGroupList : MutableList<WorkGroupInfo> = mutableListOf()
-    val skuList : MutableList<SkuInfo> = mutableListOf()
+    val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
+    val skuList: MutableList<SkuInfo> = mutableListOf()
 
-    val apple = SkuInfo(skuUid = "apple", quantity = 0, locationCode = "a-01-01",
-        cbmw = CbmwInfo(width=180.0, height=100.0, depth=80.0, weight=30.0)
+    val apple = SkuInfo(
+        skuUid = "apple", quantity = 0, locationCode = "a-01-01",
+        cbmw = CbmwInfo(width = 180.0, height = 100.0, depth = 80.0, weight = 30.0)
     )
-    val banana = SkuInfo(skuUid = "banana", quantity = 0, locationCode = "a-03-01",
-        cbmw = CbmwInfo(width=150.0, height=120.0, depth=80.0, weight=50.0)
+    val banana = SkuInfo(
+        skuUid = "banana", quantity = 0, locationCode = "a-03-01",
+        cbmw = CbmwInfo(width = 150.0, height = 120.0, depth = 80.0, weight = 50.0)
     )
-    val mango = SkuInfo(skuUid = "mango", quantity = 0, locationCode = "a-02-02",
-        cbmw = CbmwInfo(width=200.0, height=100.0, depth=65.0, weight=10.0)
+    val mango = SkuInfo(
+        skuUid = "mango", quantity = 0, locationCode = "a-02-02",
+        cbmw = CbmwInfo(width = 200.0, height = 100.0, depth = 65.0, weight = 10.0)
     )
 
     skuList.apply {
@@ -60,20 +63,20 @@ fun createWorkGroup(): MutableList<WorkGroupInfo> {
 
     val random = Random
 
-    val workGroupNumber = random.nextInt(1,5)
+    val workGroupNumber = random.nextInt(1, 5)
 
-    for (workGroupCount in 1 until workGroupNumber+1) {
+    for (workGroupCount in 1 until workGroupNumber + 1) {
         val workGroupUid = "workgroup$workGroupCount"
         val skus: MutableList<SkuInfo> = mutableListOf()
-        val skuNumber = random.nextInt(1,skuList.size)
+        val skuNumber = random.nextInt(1, skuList.size)
 
-        for (skuCount in 1..skuNumber+1) {
+        for (skuCount in 1..skuNumber + 1) {
             val sku = skuList.random()
-            sku.quantity = random.nextInt(1,15)
+            sku.quantity = random.nextInt(1, 15)
             skus.add(sku)
         }
 
-        val workGroupInfo = WorkGroupInfo(workGroupUid=workGroupUid, skus=skus)
+        val workGroupInfo = WorkGroupInfo(workGroupUid = workGroupUid, skus = skus)
         workGroupList.add(workGroupInfo)
     }
 
@@ -83,7 +86,7 @@ fun createWorkGroup(): MutableList<WorkGroupInfo> {
 fun createPicking(workGroup: WorkGroupInfo): Packing {
     val packer = Packing()
 
-    workGroup.skus.map {sku ->
+    workGroup.skus.map { sku ->
         for (index in 0 until sku.quantity) {
             val name = sku.locationCode + "_" + sku.skuUid
             val item = Item(
@@ -106,7 +109,7 @@ fun createPicking(workGroup: WorkGroupInfo): Packing {
 }
 
 fun createPickingGroups(packingResult: Packing, workGroupUid: String): MutableList<MutableList<Picking>> {
-    val totes : MutableList<MutableList<Picking>> = mutableListOf()
+    val totes: MutableList<MutableList<Picking>> = mutableListOf()
 
     for (tote in packingResult.totes) {
         val pickingGroup = mutableListOf<Picking>()
@@ -122,12 +125,13 @@ fun createPickingGroups(packingResult: Packing, workGroupUid: String): MutableLi
             }
         }
 
-        skuInfo.map {sku ->
-            val quantity = nameList.count{name -> name == sku.key}
+        skuInfo.map { sku ->
+            val quantity = nameList.count { name -> name == sku.key }
             val pickingSku = PickingSku(
                 skuUid = sku.key,
                 locationCode = skuInfo[sku.key].toString(),
-                quantity = quantity)
+                quantity = quantity
+            )
             val picking = Picking(workGroupUid, pickingSku)
             pickingGroup.add(picking)
         }
