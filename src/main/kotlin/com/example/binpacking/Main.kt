@@ -21,7 +21,7 @@ fun main() {
     workGroupList.forEach { workGroup ->
         println("=============== ${workGroup.workGroupUid} ===============")
         for (work in workGroup.skus) {
-            println("[" + work.skuUid + "] " + work.quantity)
+            println("[" + work.skuUid + "] " + work.locationCode + " / " + work.quantity)
         }
         println()
     }
@@ -42,9 +42,13 @@ fun createWorkGroup(): MutableList<WorkGroupInfo> {
     val workGroupList : MutableList<WorkGroupInfo> = mutableListOf()
     val skuList : MutableList<SkuInfo> = mutableListOf()
 
-    val apple = SkuInfo(skuUid = "apple", quantity = 0, locationCode = "a-01-01",
+    val apple1 = SkuInfo(skuUid = "apple", quantity = 0, locationCode = "a-01-01",
         cbmw = CbmwInfo(width=180.0, height=100.0, depth=80.0, weight=30.0)
     )
+    val apple2 = SkuInfo(skuUid = "apple", quantity = 0, locationCode = "a-01-02",
+        cbmw = CbmwInfo(width=180.0, height=100.0, depth=80.0, weight=30.0)
+    )
+
     val banana = SkuInfo(skuUid = "banana", quantity = 0, locationCode = "a-03-01",
         cbmw = CbmwInfo(width=150.0, height=120.0, depth=80.0, weight=50.0)
     )
@@ -53,7 +57,8 @@ fun createWorkGroup(): MutableList<WorkGroupInfo> {
     )
 
     skuList.apply {
-        add(apple)
+        add(apple1)
+        add(apple2)
         add(banana)
         add(mango)
     }
@@ -112,21 +117,21 @@ fun createPickingGroups(packingResult: Packing, workGroupUid: String): MutableLi
         val pickingGroup = mutableListOf<Picking>()
         val thisTote = mutableListOf<Picking>()
         val nameList = mutableListOf<String>()
-        val skuInfo = mutableMapOf<String, String>()
+        val skuInfo = mutableMapOf<String, List<String>>()
 
         tote.items.map { item ->
-            nameList.add(item.itemId)
+            nameList.add(item.name)
 
             if (!skuInfo.containsKey(item.name)) {
-                skuInfo[item.itemId] = item.location
+                skuInfo[item.name] = arrayListOf(item.itemId, item.location)
             }
         }
 
         skuInfo.map {sku ->
             val quantity = nameList.count{name -> name == sku.key}
             val pickingSku = PickingSku(
-                skuUid = sku.key,
-                locationCode = skuInfo[sku.key].toString(),
+                skuUid = skuInfo[sku.key]!![0],
+                locationCode = skuInfo[sku.key]!![1],
                 quantity = quantity)
             val picking = Picking(workGroupUid, pickingSku)
             pickingGroup.add(picking)
