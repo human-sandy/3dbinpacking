@@ -8,13 +8,14 @@ class Packing {
     var unfitItems: MutableList<Item> = mutableListOf()
 
     private fun addTote(): Boolean {
-        val toteSpec = ToteSpec()
         val name = "tote_" + this.totalTotes.toString()
-        val newTote = Tote(name,
-            toteSpec.width.toDouble(),
-            toteSpec.height.toDouble(),
-            toteSpec.depth.toDouble(),
-            toteSpec.weight.toDouble())
+        val newTote = Tote(
+            name,
+            ToteSpec.WIDTH.toDouble(),
+            ToteSpec.HEIGHT.toDouble(),
+            ToteSpec.DEPTH.toDouble(),
+            ToteSpec.WEIGHT.toDouble()
+        )
         this.totalTotes += 1
 
         return this.totes.add(newTote)
@@ -28,7 +29,6 @@ class Packing {
 
     private fun checkFit(tote: Tote, item: Item): Boolean {
         var fitted = false
-        val axisInfo = Axis()
 
         if (tote.items.size == 0) {
             val response = tote.putItem(item, START_POSITION)
@@ -40,9 +40,7 @@ class Packing {
             }
 
             return fitted
-        }
-
-        else {
+        } else {
             for (axis in 0..3) {
                 val itemsInTote = tote.items
 
@@ -54,16 +52,19 @@ class Packing {
                     val d = dimension[2]
 
                     when (axis) {
-                        axisInfo.WIDTH -> pivot = mutableListOf(
+                        Axis.WIDTH -> pivot = mutableListOf(
                             itemInTote.position[0] + w.toInt(),
                             itemInTote.position[1],
-                            itemInTote.position[2])
-                        axisInfo.HEIGHT -> pivot = mutableListOf(
+                            itemInTote.position[2]
+                        )
+
+                        Axis.HEIGHT -> pivot = mutableListOf(
                             itemInTote.position[0],
                             itemInTote.position[1] + h.toInt(),
                             itemInTote.position[2]
                         )
-                        axisInfo.DEPTH -> pivot = mutableListOf(
+
+                        Axis.DEPTH -> pivot = mutableListOf(
                             itemInTote.position[0],
                             itemInTote.position[1],
                             itemInTote.position[2] + d.toInt()
@@ -101,8 +102,9 @@ class Packing {
         return response
     }
 
-    fun pack(biggerFirst: Boolean = false, distributeItems: Boolean = true,
-             numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
+    fun pack(
+        biggerFirst: Boolean = false,
+        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
     ) {
 
         for (item in this.items)
@@ -110,15 +112,15 @@ class Packing {
 
         if (biggerFirst)
             this.items = this.items.reversed().toMutableList()
-        this.items = this.items.sortedWith(compareBy({ it.itemId }, { it.getVolume() })).toMutableList()
+        this.items = this.items.sortedWith(compareBy({ it.id }, { it.getVolume() })).toMutableList()
 
         this.addTote()
 
-        for (thisItem in this.items) {
-            val response = this.packToTote(thisItem)
+        this.items.forEach { item ->
+            val response = this.packToTote(item)
 
             if (response < 0)
-                this.packToTote(thisItem)
+                this.packToTote(item)
         }
     }
 }

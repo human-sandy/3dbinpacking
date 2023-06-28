@@ -1,14 +1,25 @@
 package com.example.binpacking
 
 class Tote(name: String, width: Double, height: Double, depth: Double, maxWeight: Double) {
-    var name: String = name
-    var width: Double = width
-    var height: Double = height
-    var depth: Double = depth
-    var maxWeight: Double = maxWeight
-    var items: MutableList<Item> = mutableListOf()
-    var unfittedItems: MutableList<Item> = mutableListOf()
-    var numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
+    private var name: String
+    private var width: Double
+    private var height: Double
+    private var depth: Double
+    private var maxWeight: Double
+    var items: MutableList<Item>
+    var unfittedItems: MutableList<Item>
+    private var numberOfDecimals: Int
+
+    init {
+        this.name = name
+        this.width = width
+        this.height = height
+        this.depth = depth
+        this.maxWeight = maxWeight
+        items = mutableListOf()
+        unfittedItems = mutableListOf()
+        numberOfDecimals = DEFAULT_NUMBER_OF_DECIMALS
+    }
 
     fun formatNumbers(numberOfDecimals: Int) {
         this.width = setToDecimal(this.width, numberOfDecimals)
@@ -19,32 +30,26 @@ class Tote(name: String, width: Double, height: Double, depth: Double, maxWeight
     }
 
     fun String(): String? {
-        return java.lang.String.format("%s(%sx%sx%s, max_weight:%s) vol(%s)",
-            this.name, this.width, this.height, this.depth, this.maxWeight, this.getVolume())
+        return java.lang.String.format(
+            "%s(%sx%sx%s, max_weight:%s) vol(%s)",
+            this.name, this.width, this.height, this.depth, this.maxWeight, this.getVolume()
+        )
     }
 
-    fun getVolume(): Double {
-        val volume = this.width * this.height * this.depth
-        return setToDecimal(volume, this.numberOfDecimals)
+    private fun getVolume(): Double {
+        return setToDecimal(this.width * this.height * this.depth, this.numberOfDecimals)
     }
 
-    fun getTotalWeight(): Double {
-        var totalWeight = 0.0
-
-        for (item in this.items) {
-            totalWeight += item.weight
-        }
-
-        return totalWeight
+    private fun getTotalWeight(): Double {
+        return this.items.sumOf { item -> item.weight }
     }
 
     fun putItem(item: Item, pivot: MutableList<Int>): Boolean {
-        val rotationType = RotationType()
         var fit = false
         val validItemPosition = item.position
         item.position = pivot
 
-        for (i in 0 until rotationType.ALL.size) {
+        for (i in 0 until RotationType.ALL.size) {
             item.rotationType = i
             val dimension = item.getDimension()
 
@@ -66,23 +71,19 @@ class Tote(name: String, width: Double, height: Double, depth: Double, maxWeight
 
             if (fit) {
                 if (this.getTotalWeight() + item.weight > this.maxWeight) {
-                    fit = false
-                    return fit
+                    return false
                 }
 
                 this.items.add(item)
-            }
-
-            else {
+            } else {
                 item.position = validItemPosition
             }
 
             return fit
         }
 
-        if (!fit)
-            item.position = validItemPosition
+        item.position = validItemPosition
 
-        return fit
+        return false
     }
 }
