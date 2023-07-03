@@ -1,7 +1,7 @@
-package com.example.binpacking
+package com.example.binpacking.entity
 
 const val DEFAULT_NUMBER_OF_DECIMALS: Int = 0
-val START_POSITION = mutableListOf<Int>(0, 0, 0)
+val START_POSITION = listOf<Int>(0, 0, 0)
 
 object RotationType {
     const val WHD = 0
@@ -19,7 +19,7 @@ object Axis {
     const val HEIGHT = 1
     const val DEPTH = 2
 
-    val all = listOf(WIDTH, HEIGHT, DEPTH)
+    val ALL = listOf(WIDTH, HEIGHT, DEPTH)
 }
 
 object ToteSpec {

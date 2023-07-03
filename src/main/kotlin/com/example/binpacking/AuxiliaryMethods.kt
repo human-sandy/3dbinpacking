@@ -1,28 +1,30 @@
 package com.example.binpacking
 
+import com.example.binpacking.entity.Axis
+import com.example.binpacking.entity.Item
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-fun rectIntersect(item1: Item, item2: Item, x: Int, y: Int): Boolean {
-    val d1 = item1.getDimension()
-    val d2 = item2.getDimension()
+fun rectIntersect(firstItem: Item, secondItem: Item, x: Int, y: Int): Boolean {
+    val firstDimension = firstItem.getDimension()
+    val secondDimension = secondItem.getDimension()
 
-    val cx1 = item1.position[x] + d1[x] / 2
-    val cy1 = item1.position[y] + d1[y] / 2
-    val cx2 = item2.position[x] + d2[x] / 2
-    val cy2 = item2.position[y] + d2[y] / 2
+    val firstCurrentX = firstItem.position[x] + firstDimension[x] / 2
+    val firstCurrentY = firstItem.position[y] + firstDimension[y] / 2
+    val secondCurrentX = secondItem.position[x] + secondDimension[x] / 2
+    val secondCurrentY = secondItem.position[y] + secondDimension[y] / 2
 
-    val ix = kotlin.math.max(cx1, cx2) - kotlin.math.min(cx1, cx2)
-    val iy = kotlin.math.max(cy1, cy2) - kotlin.math.min(cy1, cy2)
+    val differenceX = kotlin.math.max(firstCurrentX, secondCurrentX) - kotlin.math.min(firstCurrentX, secondCurrentX)
+    val differenceY = kotlin.math.max(firstCurrentY, secondCurrentY) - kotlin.math.min(firstCurrentY, secondCurrentY)
 
-    return ix < (d1[x] + d2[x]) / 2 && iy < (d1[y] + d2[y]) / 2
+    return differenceX < (firstDimension[x] + secondDimension[x]) / 2 && differenceY < (firstDimension[y] + secondDimension[y]) / 2
 }
 
-fun intersect(item1: Item, item2: Item): Boolean {
+fun intersect(firstItem: Item, secondItem: Item): Boolean {
     return (
-            rectIntersect(item1, item2, Axis.WIDTH, Axis.HEIGHT) &&
-                    rectIntersect(item1, item2, Axis.HEIGHT, Axis.DEPTH) &&
-                    rectIntersect(item1, item2, Axis.WIDTH, Axis.DEPTH)
+            rectIntersect(firstItem, secondItem, Axis.WIDTH, Axis.HEIGHT) &&
+                    rectIntersect(firstItem, secondItem, Axis.HEIGHT, Axis.DEPTH) &&
+                    rectIntersect(firstItem, secondItem, Axis.WIDTH, Axis.DEPTH)
             )
 }
 
