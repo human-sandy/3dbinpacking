@@ -1,31 +1,18 @@
 package com.example.binpacking.entity
 
 import com.example.binpacking.intersect
-import com.example.binpacking.setToDecimal
 
 class Tote(val name: String, var width: Double, var height: Double, var depth: Double, var maxWeight: Double) {
     val items: MutableList<Item> = mutableListOf()
     val unfittedItems: MutableList<Item> = mutableListOf()
     private var numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
 
-    fun formatNumbers(numberOfDecimals: Int) {
-        width = setToDecimal(this.width, numberOfDecimals)
-        height = setToDecimal(this.height, numberOfDecimals)
-        depth = setToDecimal(this.depth, numberOfDecimals)
-        maxWeight = setToDecimal(this.maxWeight, numberOfDecimals)
-        this.numberOfDecimals = numberOfDecimals
-    }
-
-    private fun getVolume(): Double {
-        return setToDecimal(width * height * depth, this.numberOfDecimals)
-    }
-
     private fun getTotalWeight(): Double {
         return this.items.sumOf { item -> item.weight }
     }
 
     fun putItem(item: Item, pivot: List<Int>): Boolean {
-        var fit = false
+        var fit: Boolean
         val validItemPosition = item.position
         item.position = pivot.toMutableList()
 
