@@ -11,7 +11,7 @@ class Item(
 ) {
     var rotationType: Int = 0
     var position: MutableList<Int> = START_POSITION.toMutableList()
-    var numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
+    private var numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
 
     fun formatNumbers(numberOfDecimals: Int) {
         width = setToDecimal(this.width, numberOfDecimals)
@@ -19,14 +19,6 @@ class Item(
         depth = setToDecimal(this.depth, numberOfDecimals)
         weight = setToDecimal(this.weight, numberOfDecimals)
         this.numberOfDecimals = numberOfDecimals
-    }
-
-    fun String(): String? {
-        return java.lang.String.format(
-            "%s(%sx%sx%s, weight: %s) pos(%s) rt(%s) vol(%s) count : %s",
-            name, width, height, depth, weight, position,
-            rotationType, getVolume(), quantity
-        )
     }
 
     fun getVolume(): Double {
@@ -52,5 +44,9 @@ class Item(
         }
 
         return dimension
+    }
+
+    override fun toString(): String {
+        return "Item(id='$id', location='$location', name='$name', width=$width, height=$height, depth=$depth, weight=$weight, quantity=$quantity, rotationType=$rotationType, position=$position, numberOfDecimals=$numberOfDecimals)"
     }
 }

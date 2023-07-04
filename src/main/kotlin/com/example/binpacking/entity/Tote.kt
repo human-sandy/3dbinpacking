@@ -16,13 +16,6 @@ class Tote(val name: String, var width: Double, var height: Double, var depth: D
         this.numberOfDecimals = numberOfDecimals
     }
 
-    fun String(): String? {
-        return java.lang.String.format(
-            "%s(%sx%sx%s, max_weight:%s) vol(%s)",
-            name, width, height, depth, maxWeight, getVolume()
-        )
-    }
-
     private fun getVolume(): Double {
         return setToDecimal(width * height * depth, this.numberOfDecimals)
     }
@@ -70,4 +63,9 @@ class Tote(val name: String, var width: Double, var height: Double, var depth: D
 
         return false
     }
+
+    override fun toString(): String {
+        return "Tote(name='$name', width=$width, height=$height, depth=$depth, maxWeight=$maxWeight, items=$items, unfittedItems=$unfittedItems, numberOfDecimals=$numberOfDecimals)"
+    }
+
 }
