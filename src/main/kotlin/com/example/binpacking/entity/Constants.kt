@@ -23,8 +23,8 @@ object Axis {
 }
 
 object ToteSpec {
-    const val WIDTH: Int = 360
-    const val HEIGHT: Int = 460
-    const val DEPTH: Int = 130
+    const val WIDTH: Int = 304
+    const val HEIGHT: Int = 384
+    const val DEPTH: Int = 104
     const val WEIGHT: Int = 12000
 }
