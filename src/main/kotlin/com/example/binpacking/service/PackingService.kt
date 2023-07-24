@@ -10,14 +10,16 @@ class PackingService {
         val totes: MutableList<Tote> = mutableListOf()
         private var totalTotes: Int = 0
 
+        private val toteSpec = ToteSpec(0.15)
+
         fun addTote() {
             val name = "tote_$totalTotes"
             val newTote = Tote(
                 name,
-                ToteSpec.WIDTH.toDouble(),
-                ToteSpec.HEIGHT.toDouble(),
-                ToteSpec.DEPTH.toDouble(),
-                ToteSpec.WEIGHT.toDouble()
+                toteSpec.width,
+                toteSpec.height,
+                toteSpec.depth,
+                toteSpec.weight
             )
             totalTotes += 1
 
