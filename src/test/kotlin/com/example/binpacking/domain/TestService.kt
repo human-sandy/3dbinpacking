@@ -1,7 +1,7 @@
-package com.example.binpacking.service
+package com.example.binpacking.domain
 
 import com.example.binpacking.entity.Item
-import com.example.binpacking.entity.*
+import com.example.binpacking.service.PackingService
 import kotlin.random.Random
 
 class TestService {
@@ -10,11 +10,11 @@ class TestService {
 
     private fun runningTest(): MutableList<List<Picking>> {
         val toteList: MutableList<List<Picking>> = mutableListOf()
-        workGroupList.forEach {workGroup ->
+        workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
             val totes = createPickingGroups(packingResult, workGroup.workGroupUid)
 
-            totes.map {tote ->
+            totes.map { tote ->
                 toteList.add(tote)
             }
         }

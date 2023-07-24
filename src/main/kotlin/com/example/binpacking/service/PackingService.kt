@@ -36,7 +36,7 @@ class PackingService {
         }
     }
 
-    private fun checkFit(tote: Tote, item: Item) : Boolean {
+    private fun checkFit(tote: Tote, item: Item): Boolean {
         var fitted = false
 
         if (tote.items.isEmpty()) {
@@ -79,11 +79,13 @@ class PackingService {
                     itemInTote.position[1],
                     itemInTote.position[2]
                 )
+
                 Axis.HEIGHT -> listOf(
                     itemInTote.position[0],
                     itemInTote.position[1] + height.toInt(),
                     itemInTote.position[2]
                 )
+
                 Axis.DEPTH -> listOf(
                     itemInTote.position[0],
                     itemInTote.position[1],
@@ -120,11 +122,11 @@ class PackingService {
 
         if (biggerFirst)
             packingItem.items.reversed()
-        packingItem.items.sortedWith(compareBy({it.id}, {it.getVolume()}))
+        packingItem.items.sortedWith(compareBy({ it.id }, { it.getVolume() }))
 
         packingTote.addTote()
 
-        packingItem.items.map {item ->
+        packingItem.items.map { item ->
             val response = packToTote(item, packingTote.totes)
 
             if (!response)
