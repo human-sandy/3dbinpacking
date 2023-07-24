@@ -2,3 +2,12 @@
 /.gradle/
 /build/
 /build/classes/kotlin/main/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/

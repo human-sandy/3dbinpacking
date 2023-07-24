@@ -22,9 +22,11 @@ object Axis {
     val ALL = listOf(WIDTH, HEIGHT, DEPTH)
 }
 
-object ToteSpec {
-    const val WIDTH: Int = 304
-    const val HEIGHT: Int = 384
-    const val DEPTH: Int = 104
-    const val WEIGHT: Int = 12000
+class ToteSpec(
+    margin: Double, // 0.0 ~ 1.0, ex) 0.8
+) {
+    val width: Double = 360 * (1 - margin)
+    val height: Double = 460 * (1 - margin)
+    val depth: Double = 130 * (1 - margin)
+    val weight: Double = 12000 * (1 - margin)
 }
