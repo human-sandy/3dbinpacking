@@ -44,6 +44,20 @@ class TestService {
         return listOf(apple1, apple2, banana, mango)
     }
 
+    private fun testbedData(): List<SkuInfo> {
+        val household = SkuInfo(
+            skuUid = "household", quantity = 0, locationCode = "D2-31-03",
+            cbmw = CbmwInfo(width = 200.0, depth = 160.0, height = 130.0, weight = 0.0)
+        )
+
+        val beauty = SkuInfo(
+            skuUid = "beauty", quantity = 0, locationCode = "B1-61-01",
+            cbmw = CbmwInfo(width = 210.0, depth = 155.0, height = 100.0, weight = 0.0)
+        )
+
+        return listOf(household, beauty)
+    }
+
     private fun createWorkGroup(skuList: List<SkuInfo>, workGroupCount: Int): WorkGroupInfo {
         val workGroupUid = "workgroup$workGroupCount"
         val skus: MutableList<SkuInfo> = mutableListOf()
@@ -51,7 +65,7 @@ class TestService {
 
         for (skuCount in 1 until skuNumber + 1) {
             val sku = skuList.random()
-            sku.quantity = Random.nextInt(1, 10)
+            sku.quantity = Random.nextInt(10, 15)
             skus.add(sku)
         }
 
@@ -59,7 +73,7 @@ class TestService {
     }
 
     private fun createWorkGroupList(): List<WorkGroupInfo> {
-        val skuList = testData()
+        val skuList = testbedData()
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
 
         val workGroupNumber = Random.nextInt(1, 5)
@@ -76,20 +90,19 @@ class TestService {
         val packer = PackingService()
 
         workGroup.skus.map { sku ->
-            for (index in 0 until sku.quantity) {
-                val name = sku.locationCode + "_" + sku.skuUid
-                val item = Item(
-                    sku.skuUid,
-                    sku.locationCode,
-                    name,
-                    sku.cbmw.width,
-                    sku.cbmw.height,
-                    sku.cbmw.depth,
-                    sku.cbmw.weight,
-                    1
-                )
-                packer.packingItem.addItem(item)
-            }
+            val name = sku.locationCode + "_" + sku.skuUid
+            val item = Item(
+                sku.skuUid,
+                sku.locationCode,
+                name,
+                sku.cbmw.width,
+                sku.cbmw.height,
+                sku.cbmw.depth,
+                sku.cbmw.weight,
+                sku.quantity
+            )
+            packer.packingItem.addItem(item)
+
         }
 
         packer.pack()

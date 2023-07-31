@@ -129,10 +129,14 @@ class PackingService {
         packingTote.addTote()
 
         packingItem.items.map { item ->
-            val response = packToTote(item, packingTote.totes)
+            for (index in 0 until item.quantity) {
+                val sku = item.copy()
+                sku.quantity = 1
+                val response = packToTote(sku, packingTote.totes)
 
-            if (!response)
-                packToTote(item, packingTote.totes)
+                if (!response)
+                    packToTote(sku, packingTote.totes)
+            }
         }
     }
 }
