@@ -46,6 +46,10 @@ class Item(
         return dimension
     }
 
+    fun copy(): Item {
+        return Item(id, location, name, width, height, depth, weight, quantity)
+    }
+
     override fun toString(): String {
         return "Item(id='$id', location='$location', name='$name', width=$width, height=$height, depth=$depth, weight=$weight, quantity=$quantity, rotationType=$rotationType, position=$position, numberOfDecimals=$numberOfDecimals)"
     }
