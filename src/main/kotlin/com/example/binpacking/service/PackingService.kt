@@ -4,8 +4,8 @@ import com.example.binpacking.entity.*
 
 class PackingService {
     val packingTote = PackingTote()
-    val packingByOne = PackingTote()
     val packingItem = PackingItem()
+    val singleItemPacking = PackingTote()
 
     class PackingTote {
         val totes: MutableList<Tote> = mutableListOf()
@@ -110,7 +110,7 @@ class PackingService {
         val lastTote = totes[totes.size - 1]
 
         if (!checkFit(lastTote, item)) {
-            packingByOne.addTote()
+            singleItemPacking.addTote()
             return false
         }
 
@@ -127,8 +127,34 @@ class PackingService {
         return occurrenceMap
     }
 
-    private fun groupingItemInTote() {
-        packingByOne.totes.map { tote ->
+
+    fun pack(
+        biggerFirst: Boolean = false,
+        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
+    ) {
+        packingItem.items.map { item -> item.formatNumbers(numberOfDecimals) }
+
+        if (biggerFirst)
+            packingItem.items.reversed()
+        packingItem.items.sortedWith(compareBy({ it.id }, { it.getVolume() }))
+
+        singleItemPacking.addTote()
+
+        packingItem.items.map { item ->
+            for (index in 0 until item.quantity) {
+                val sku = item.copy()
+                sku.quantity = 1
+                val response = packToTote(sku, singleItemPacking.totes)
+
+                if (!response)
+                    packToTote(sku, singleItemPacking.totes)
+            }
+        }
+        groupItemsInTote()
+    }
+
+    private fun groupItemsInTote() {
+        singleItemPacking.totes.map { tote ->
             val wholeItems = mutableListOf<Item>()
             val distinctItems = mutableListOf<Item>()
             val idList = mutableListOf<String>()
@@ -160,30 +186,5 @@ class PackingService {
                 packingTote.totes.last().items.add(item)
             }
         }
-    }
-
-    fun pack(
-        biggerFirst: Boolean = false,
-        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
-    ) {
-        packingItem.items.map { item -> item.formatNumbers(numberOfDecimals) }
-
-        if (biggerFirst)
-            packingItem.items.reversed()
-        packingItem.items.sortedWith(compareBy({ it.id }, { it.getVolume() }))
-
-        packingByOne.addTote()
-
-        packingItem.items.map { item ->
-            for (index in 0 until item.quantity) {
-                val sku = item.copy()
-                sku.quantity = 1
-                val response = packToTote(sku, packingByOne.totes)
-
-                if (!response)
-                    packToTote(sku, packingByOne.totes)
-            }
-        }
-        groupingItemInTote()
     }
 }
