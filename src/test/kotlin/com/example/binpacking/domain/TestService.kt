@@ -6,20 +6,13 @@ import kotlin.random.Random
 
 class TestService {
     val workGroupList: List<WorkGroupInfo> = createWorkGroupList()
-    val toteList: List<List<Picking>> = runningTest()
 
-    private fun runningTest(): MutableList<List<Picking>> {
+    fun runningTest() {
         val toteList: MutableList<List<Picking>> = mutableListOf()
         workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
-            val totes = createPickingGroups(packingResult, workGroup.workGroupUid)
-
-            totes.map { tote ->
-                toteList.add(tote)
-            }
+            createPickingFloor(packingResult)
         }
-
-        return toteList
     }
 
     private fun testData(): List<SkuInfo> {
@@ -45,8 +38,13 @@ class TestService {
     }
 
     private fun testbedData(): List<SkuInfo> {
-        val household = SkuInfo(
+        val household1 = SkuInfo(
             skuUid = "household", quantity = 0, locationCode = "D2-31-03",
+            cbmw = CbmwInfo(width = 200.0, depth = 160.0, height = 130.0, weight = 0.0)
+        )
+
+        val household2 = SkuInfo(
+            skuUid = "household", quantity = 0, locationCode = "A2-14-03",
             cbmw = CbmwInfo(width = 200.0, depth = 160.0, height = 130.0, weight = 0.0)
         )
 
@@ -55,7 +53,7 @@ class TestService {
             cbmw = CbmwInfo(width = 210.0, depth = 155.0, height = 100.0, weight = 0.0)
         )
 
-        return listOf(household, beauty)
+        return listOf(household1, household2, beauty)
     }
 
     private fun createWorkGroup(skuList: List<SkuInfo>, workGroupCount: Int): WorkGroupInfo {
@@ -110,38 +108,14 @@ class TestService {
         return packer
     }
 
-    private fun createPickingGroups(packingResult: PackingService, workGroupUid: String): List<List<Picking>> {
-        val totes: MutableList<List<Picking>> = mutableListOf()
-
-        packingResult.packingTote.totes.map { tote ->
-            val pickingGroup = mutableListOf<Picking>()
-            val thisTote = mutableListOf<Picking>()
-            val nameList = mutableListOf<String>()
-            val skuInfo = mutableMapOf<String, List<String>>()
-
-            tote.items.map { item ->
-                nameList.add(item.name)
-
-                if (!skuInfo.containsKey(item.name)) {
-                    skuInfo[item.name] = arrayListOf(item.id, item.location)
-                }
+    private fun createPickingFloor(packing: PackingService) {
+        packing.packingTote.totes.forEach { tote ->
+            println("===================== [" + tote.name + "] =====================")
+            tote.items.forEach { item ->
+                println(item.id + " / " + item.quantity)
             }
-
-            skuInfo.map { sku ->
-                val quantity = nameList.count { name -> name == sku.key }
-                val pickingSku = PickingSku(
-                    skuUid = skuInfo[sku.key]!![0],
-                    quantity = quantity
-                )
-                val picking = Picking(workGroupUid, pickingSku)
-                pickingGroup.add(picking)
-            }
-
-            pickingGroup.map { picking -> thisTote.add(picking) }
-
-            totes.add(thisTote)
+            println()
         }
-
-        return totes
     }
+
 }

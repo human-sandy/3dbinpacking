@@ -5,6 +5,7 @@ import com.example.binpacking.entity.*
 class PackingService {
     val packingTote = PackingTote()
     val packingItem = PackingItem()
+    val singleItemPacking = PackingTote()
 
     class PackingTote {
         val totes: MutableList<Tote> = mutableListOf()
@@ -109,12 +110,23 @@ class PackingService {
         val lastTote = totes[totes.size - 1]
 
         if (!checkFit(lastTote, item)) {
-            packingTote.addTote()
+            singleItemPacking.addTote()
             return false
         }
 
         return true
     }
+
+    private fun countDuplicates(targetList: MutableList<String>): Map<String, Int> {
+        val occurrenceMap = mutableMapOf<String, Int>()
+
+        targetList.forEach {name ->
+            occurrenceMap[name] = occurrenceMap.getOrDefault(name, 0) + 1
+        }
+
+        return occurrenceMap
+    }
+
 
     fun pack(
         biggerFirst: Boolean = false,
@@ -126,16 +138,52 @@ class PackingService {
             packingItem.items.reversed()
         packingItem.items.sortedWith(compareBy({ it.id }, { it.getVolume() }))
 
-        packingTote.addTote()
+        singleItemPacking.addTote()
 
         packingItem.items.map { item ->
             for (index in 0 until item.quantity) {
                 val sku = item.copy()
                 sku.quantity = 1
-                val response = packToTote(sku, packingTote.totes)
+                val response = packToTote(sku, singleItemPacking.totes)
 
                 if (!response)
-                    packToTote(sku, packingTote.totes)
+                    packToTote(sku, singleItemPacking.totes)
+            }
+        }
+        groupItemsInTote()
+    }
+
+    private fun groupItemsInTote() {
+        singleItemPacking.totes.map { tote ->
+            val wholeItems = mutableListOf<Item>()
+            val distinctItems = mutableListOf<Item>()
+            val idList = mutableListOf<String>()
+            val skuInfo = mutableMapOf<String, List<String>>()
+
+            tote.items.map { item ->
+                idList.add(item.id)
+
+                if (!skuInfo.containsKey(item.id)) {
+                    skuInfo[item.id] = arrayListOf(item.id, item.location)
+                    wholeItems.add(item.copy())
+                }
+            }
+
+            val duplicatesCount = countDuplicates(idList)
+            packingTote.addTote()
+
+            duplicatesCount.map { sku ->
+                val quantity = sku.value
+                val existingItem = wholeItems.find { item -> item.id == sku.key }
+
+                if (existingItem != null) {
+                    existingItem.quantity = quantity
+                    distinctItems.add(existingItem)
+                }
+            }
+
+            distinctItems.forEach { item ->
+                packingTote.totes.last().items.add(item)
             }
         }
     }

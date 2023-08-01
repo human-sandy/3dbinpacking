@@ -18,13 +18,6 @@ class BinPackingTest {
             println()
         }
 
-        testService.toteList.map { totes ->
-            index++
-            println("================= Tote $index =================")
-            totes.forEach { tote ->
-                println("[" + tote.workGroupUid + "] " + tote.pickingSku.skuUid + " : " + tote.pickingSku.quantity)
-            }
-            println()
-        }
+        testService.runningTest()
     }
 }
