@@ -4,6 +4,7 @@ import com.example.binpacking.entity.*
 
 class PackingService {
     val packingTote = PackingTote()
+    val packingByOne = PackingTote()
     val packingItem = PackingItem()
 
     class PackingTote {
@@ -109,11 +110,45 @@ class PackingService {
         val lastTote = totes[totes.size - 1]
 
         if (!checkFit(lastTote, item)) {
-            packingTote.addTote()
+            packingByOne.addTote()
             return false
         }
 
         return true
+    }
+
+    private fun groupingItemInTote() {
+        packingByOne.totes.map { tote ->
+            val wholeItems = mutableListOf<Item>()
+            val distinctItems = mutableListOf<Item>()
+            val nameList = mutableListOf<String>()
+            val skuInfo = mutableMapOf<String, List<String>>()
+
+            tote.items.map { item ->
+                nameList.add(item.name)
+
+                if (!skuInfo.containsKey(item.name)) {
+                    skuInfo[item.name] = arrayListOf(item.id, item.location)
+                    wholeItems.add(item.copy())
+                }
+            }
+
+            packingTote.addTote()
+
+            skuInfo.map { sku ->
+                val quantity = nameList.count { name -> name == sku.key }
+                val existingItem = wholeItems.find { item -> item.id == sku.value[0] && item.location == sku.value[1] }
+
+                if (existingItem != null) {
+                    existingItem.quantity = quantity
+                    distinctItems.add(existingItem)
+                }
+            }
+
+            distinctItems.forEach { item ->
+                packingTote.totes.last().items.add(item)
+            }
+        }
     }
 
     fun pack(
@@ -126,17 +161,18 @@ class PackingService {
             packingItem.items.reversed()
         packingItem.items.sortedWith(compareBy({ it.id }, { it.getVolume() }))
 
-        packingTote.addTote()
+        packingByOne.addTote()
 
         packingItem.items.map { item ->
             for (index in 0 until item.quantity) {
                 val sku = item.copy()
                 sku.quantity = 1
-                val response = packToTote(sku, packingTote.totes)
+                val response = packToTote(sku, packingByOne.totes)
 
                 if (!response)
-                    packToTote(sku, packingTote.totes)
+                    packToTote(sku, packingByOne.totes)
             }
         }
+        groupingItemInTote()
     }
 }
