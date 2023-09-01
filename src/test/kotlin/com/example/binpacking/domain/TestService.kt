@@ -2,6 +2,10 @@ package com.example.binpacking.domain
 
 import com.example.binpacking.entity.Item
 import com.example.binpacking.service.PackingService
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileReader
+import java.util.Dictionary
 import kotlin.random.Random
 
 class TestService {
@@ -13,6 +17,39 @@ class TestService {
             val packingResult = createPicking(workGroup)
             createPickingFloor(packingResult)
         }
+    }
+
+    // order_id,sku_id,request_quantity,location_code,
+    // width,height,depth,weight
+    private fun csvData(fileUrl: String): MutableMap<String, MutableList<SkuInfo>> {
+        val sampleDataFile = File(fileUrl)
+        val reader = BufferedReader(FileReader(sampleDataFile, Charsets.UTF_8))
+
+        //Dictionary<Int, List<SkuInfo>>
+        val orderList = mutableMapOf<String, MutableList<SkuInfo>>()
+
+        reader.lines().forEach {row ->
+            val data = row.split(",")
+            val workGroupUid = data[0]
+            val cbmw = CbmwInfo(
+                width = data[4].toDouble(),
+                height = data[5].toDouble(),
+                depth = data[6].toDouble(),
+                weight = data[7].toDouble()
+            )
+            val sku = SkuInfo(
+                skuUid = data[1],
+                quantity = data[2].toInt(),
+                locationCode = data[3],
+                cbmw = cbmw
+            )
+            if (!orderList.containsKey(workGroupUid))
+                orderList[workGroupUid] = mutableListOf(sku)
+            else
+                orderList[workGroupUid]?.add(sku)
+        }
+
+        return orderList
     }
 
     private fun testData(): List<SkuInfo> {
@@ -71,16 +108,18 @@ class TestService {
     }
 
     private fun createWorkGroupList(): List<WorkGroupInfo> {
-        val skuList = testbedData() // (beauty, household)
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
+        val orderList = csvData(fileUrl = "./src/main/files/sample_0803.csv")
 
-        val workGroupNumber = Random.nextInt(1, 5) //workGroup 몇 개?
+        orderList.map { workGroup ->
+            val workGroupInfo = WorkGroupInfo(
+                workGroupUid = workGroup.key,
+                skus = workGroup.value
+            )
 
-        //random으로 뽑은 workGroup 개수만큼 createWorkGroup
-        for (workGroupCount in 1 until workGroupNumber + 1) {
-            val workGroupInfo = createWorkGroup(skuList, workGroupCount)  //아이템 카테고리 리스트와 몇 번재 work인지 정보 전달
             workGroupList.add(workGroupInfo)
         }
+
         return workGroupList
     }
 
