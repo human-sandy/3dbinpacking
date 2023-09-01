@@ -62,8 +62,8 @@ class TestService {
         val skuNumber = Random.nextInt(1, skuList.size)
 
         for (skuCount in 1 until skuNumber + 1) {
-            val sku = skuList.random()
-            sku.quantity = Random.nextInt(10, 15)
+            val sku = skuList.random() // item 카테고리 리스트 중에 어떤 item으로 workGroup 만들지 랜덤 뽑기
+            sku.quantity = Random.nextInt(10, 15) // 해당 item 몇 개 만들지 보기
             skus.add(sku)
         }
 
@@ -71,16 +71,16 @@ class TestService {
     }
 
     private fun createWorkGroupList(): List<WorkGroupInfo> {
-        val skuList = testbedData()
+        val skuList = testbedData() // (beauty, household)
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
 
-        val workGroupNumber = Random.nextInt(1, 5)
+        val workGroupNumber = Random.nextInt(1, 5) //workGroup 몇 개?
 
+        //random으로 뽑은 workGroup 개수만큼 createWorkGroup
         for (workGroupCount in 1 until workGroupNumber + 1) {
-            val workGroupInfo = createWorkGroup(skuList, workGroupCount)
+            val workGroupInfo = createWorkGroup(skuList, workGroupCount)  //아이템 카테고리 리스트와 몇 번재 work인지 정보 전달
             workGroupList.add(workGroupInfo)
         }
-
         return workGroupList
     }
 
@@ -99,6 +99,7 @@ class TestService {
                 sku.cbmw.weight,
                 sku.quantity
             )
+            item.getDimension()
             packer.packingItem.addItem(item)
 
         }

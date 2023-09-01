@@ -1,54 +1,71 @@
 package com.example.binpacking.entity
 
-import com.example.binpacking.intersect
+import java.util.LinkedList
 
-class Tote(val name: String, var width: Double, var height: Double, var depth: Double, var maxWeight: Double) {
+class Tote(
+    val name: String,
+    var width: Double,
+    var height: Double,
+    var depth: Double,
+    var maxWeight: Double)
+{
     val items: MutableList<Item> = mutableListOf()
     val unfittedItems: MutableList<Item> = mutableListOf()
     private var numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
+    private val priorPivot: List<Double> = listOf(0.0, 0.0, 0.0)
+    private var pivots: LinkedList<List<Double>> = LinkedList(listOf(priorPivot))
+    private var vertexs = LinkedList<List<Double>>()
+
 
     private fun getTotalWeight(): Double {
         return this.items.sumOf { item -> item.weight }
     }
 
-    fun putItem(item: Item, pivot: List<Int>): Boolean {
-        var fit: Boolean
-        val validItemPosition = item.position
-        item.position = pivot.toMutableList()
+    private fun checkSize(item:Item, pivot:List<Double>): Boolean {
+        if (
+            width > pivot[0] + item.width &&
+            depth > pivot[1] + item.depth &&
+            height > pivot[2] + item.height
+        ) {return true}
+        else{ return false }
+    }
 
-        for (i in 0 until RotationType.ALL.size) {
-            item.rotationType = i
-            val dimension = item.getDimension()
+    private fun sumPoints(pivot: List<Double>, gap:List<Double>): List<Double> {
+        return listOf(pivot[0]+gap[0], pivot[1]+gap[1], pivot[2]+gap[2])
+    }
 
-            if (
-                width < pivot[0] + dimension[0] ||
-                height < pivot[1] + dimension[1] ||
-                depth < pivot[2] + dimension[2]
-            )
-                continue
+    private fun addPivots(item:Item, pivot:List<Double>) {
+        pivots.remove(pivot)
+        pivots.add(sumPoints(pivot, listOf(item.width, 0.0, 0.0)))
+        pivots.add(sumPoints(pivot, listOf(0.0, item.depth, 0.0)))
+        pivots.add(sumPoints(pivot, listOf(0.0, 0.0, item.height)))
+                // item.position == pivot but 가독성을 위해
 
-            fit = true
+        vertexs.add(sumPoints(pivot, listOf(item.width, item.depth, 0.0)))
+        vertexs.add(sumPoints(pivot, listOf(item.width, item.depth, item.height)))
+    }
 
-            for (currentItemInTote in items) {
-                if (intersect(currentItemInTote, item)) {
-                    fit = false
+    fun putItem(item: Item): Boolean {
+        var fit: Boolean = false
+        if (getTotalWeight() + item.weight < maxWeight){
+
+            for (pivot in pivots){
+                if (checkSize(item, pivot)){
+                    fit = true
+                    item.position = pivot.toMutableList()
+                    addPivots(item, pivot)
                     break
                 }
+                else{ item.widthDepthSwitch()
+                    if (checkSize(item, pivot))
+                        fit = true
+                        item.position = pivot.toMutableList()
+                        addPivots(item, pivot)
+                        break
+                }
             }
-
-            if (fit) {
-                if (getTotalWeight() + item.weight > maxWeight)
-                    return false
-                items.add(item)
-            } else {
-                item.position = validItemPosition
-            }
-            return fit
         }
-
-        item.position = validItemPosition
-
-        return false
+        return fit
     }
 
     override fun toString(): String {

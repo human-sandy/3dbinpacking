@@ -7,8 +7,8 @@ class PackingService {
     val packingItem = PackingItem()
     val singleItemPacking = PackingTote()
 
-    class PackingTote {
-        val totes: MutableList<Tote> = mutableListOf()
+    class PackingTote{
+        var totes: MutableList<Tote> = mutableListOf()
         private var totalTotes: Int = 0
 
         private val toteSpec = ToteSpec(0.0)
@@ -38,6 +38,7 @@ class PackingService {
             items.add(item)
         }
     }
+
 
     private fun checkFit(tote: Tote, item: Item): Boolean {
         var fitted = false
@@ -127,30 +128,34 @@ class PackingService {
         return occurrenceMap
     }
 
-
     fun pack(
-        biggerFirst: Boolean = false,
+        biggerFirst: Boolean = true,
         numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
-    ) {
-        packingItem.items.map { item -> item.formatNumbers(numberOfDecimals) }
-
+    ){
         if (biggerFirst)
-            packingItem.items.reversed()
-        packingItem.items.sortedWith(compareBy({ it.id }, { it.getVolume() }))
-
-        singleItemPacking.addTote()
+            packingItem.items.sortedBy{ it.getArea() }
 
         packingItem.items.map { item ->
             for (index in 0 until item.quantity) {
-                val sku = item.copy()
-                sku.quantity = 1
-                val response = packToTote(sku, singleItemPacking.totes)
+                var packed = false
 
-                if (!response)
-                    packToTote(sku, singleItemPacking.totes)
-            }
-        }
-        groupItemsInTote()
+                if (packingTote.totes.isEmpty()){
+                    packingTote.addTote() }
+
+                for (tote in packingTote.totes){
+                    if(tote.putItem(item)) {
+                        tote.items.add(item)
+                        packed = true
+                        break
+                    } else
+                        tote.unfittedItems.add(item)
+                }
+
+                if (!packed) {
+                    with(packingTote){
+                        this.addTote()
+                        this.totes.last().putItem(item)
+                        this.totes.last().items.add(item)}
     }
 
     private fun groupItemsInTote() {
@@ -184,6 +189,7 @@ class PackingService {
 
             distinctItems.forEach { item ->
                 packingTote.totes.last().items.add(item)
+
             }
         }
     }
