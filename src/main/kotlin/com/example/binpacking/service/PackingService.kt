@@ -34,8 +34,12 @@ class PackingService {
         private var totalItems: Int = 0
 
         fun addItem(item: Item) {
-            totalItems += 1
-            items.add(item)
+            for (index in 0 until item.quantity) {
+            // item 개별 확인용
+                totalItems += 1
+                val individualItem = item.copy()
+                individualItem.getDimension()
+                items.add(individualItem)}
         }
     }
 
@@ -58,7 +62,6 @@ class PackingService {
             packingItem.items.sortedBy { it.getArea() }
 
         packingItem.items.map { item ->
-            for (index in 0 until item.quantity) {
                 var packed = false
 
                 if (packingTote.totes.isEmpty()) {
@@ -82,7 +85,6 @@ class PackingService {
                     }
                 }
             }
-        }
 
         groupItemsInTote()
     }

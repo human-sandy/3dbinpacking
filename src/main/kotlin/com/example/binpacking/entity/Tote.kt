@@ -36,9 +36,18 @@ class Tote(
 
     private fun addPivots(item:Item, pivot:List<Double>) {
         pivots.remove(pivot)
-        pivots.add(sumPoints(pivot, listOf(item.width, 0.0, 0.0)))
-        pivots.add(sumPoints(pivot, listOf(0.0, item.depth, 0.0)))
-        pivots.add(sumPoints(pivot, listOf(0.0, 0.0, item.height)))
+        var newPivot = sumPoints(pivot, listOf(item.width, 0.0, 0.0))
+        if (!pivots.contains(newPivot)){
+            pivots.add(newPivot)
+        }
+        newPivot = sumPoints(pivot, listOf(0.0, item.depth, 0.0))
+        if (!pivots.contains(newPivot)){
+            pivots.add(newPivot)
+        }
+        newPivot = sumPoints(pivot, listOf(0.0, 0.0, item.height))
+        if (!pivots.contains(newPivot)){
+            pivots.add(newPivot)
+        }
                 // item.position == pivot but 가독성을 위해
 
         vertexs.add(sumPoints(pivot, listOf(item.width, item.depth, 0.0)))
