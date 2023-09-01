@@ -23,9 +23,9 @@ class Tote(
 
     private fun checkSize(item:Item, pivot:List<Double>): Boolean {
         if (
-            width > pivot[0] + item.width &&
-            depth > pivot[1] + item.depth &&
-            height > pivot[2] + item.height
+            width >= pivot[0] + item.width &&
+            depth >= pivot[1] + item.depth &&
+            height >= pivot[2] + item.height
         ) {return true}
         else{ return false }
     }
