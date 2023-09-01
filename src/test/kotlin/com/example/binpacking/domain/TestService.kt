@@ -112,8 +112,9 @@ class TestService {
     private fun createPickingFloor(packing: PackingService) {
         packing.packingTote.totes.forEach { tote ->
             println("===================== [" + tote.name + "] =====================")
+            println("total "+tote.items.size+" items")
             tote.items.forEach { item ->
-                println(item.id + " / " + item.quantity)
+                println(item.id + " / " + item.position)
             }
             println()
         }
