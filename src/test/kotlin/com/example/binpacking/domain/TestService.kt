@@ -109,7 +109,7 @@ class TestService {
 
     private fun createWorkGroupList(): List<WorkGroupInfo> {
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
-        val orderList = csvData(fileUrl = "./src/main/files/sample_0803.csv")
+        /* val orderList = csvData(fileUrl = "./src/main/files/sample_0803.csv")
 
         orderList.map { workGroup ->
             val workGroupInfo = WorkGroupInfo(
@@ -117,6 +117,14 @@ class TestService {
                 skus = workGroup.value
             )
 
+            workGroupList.add(workGroupInfo)
+        }*/
+
+        val skuList = testbedData()
+        val workGroupNumber = Random.nextInt(1, 5)
+
+        for (workGroupCount in 1 until workGroupNumber + 1) {
+            val workGroupInfo = createWorkGroup(skuList, workGroupCount)
             workGroupList.add(workGroupInfo)
         }
 
@@ -153,10 +161,9 @@ class TestService {
             println("===================== [" + tote.name + "] =====================")
             println("total "+tote.items.size+" items")
             tote.items.forEach { item ->
-                println(item.id + " / " + item.position)
+                println(item.id + " / " + item.position+ " + " + listOf(item.width, item.depth, item.height))
             }
             println()
         }
     }
-
 }
