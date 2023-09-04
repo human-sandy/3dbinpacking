@@ -22,12 +22,14 @@ class Tote(
     }
 
     private fun checkSize(item:Item, pivot:List<Double>): Boolean {
+        var fit = false
         if (
             width >= pivot[0] + item.width &&
             depth >= pivot[1] + item.depth &&
             height >= pivot[2] + item.height
-        ) {return true}
-        else{ return false }
+        ) { fit = true
+            return fit}
+        else{ return fit }
     }
 
     private fun sumPoints(pivot: List<Double>, gap:List<Double>): List<Double> {
@@ -66,11 +68,14 @@ class Tote(
                     break
                 }
                 else{ item.widthDepthSwitch()
-                    if (checkSize(item, pivot))
+                    if (checkSize(item, pivot)){
                         fit = true
                         item.position = pivot.toMutableList()
                         addPivots(item, pivot)
-                        break
+                        break }
+                    else{
+                        item.widthDepthSwitch()
+                    }
                 }
             }
         }
