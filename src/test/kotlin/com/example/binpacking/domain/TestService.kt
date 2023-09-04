@@ -5,6 +5,7 @@ import com.example.binpacking.service.PackingService
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
+import java.io.FileWriter
 import java.util.Dictionary
 import kotlin.random.Random
 
@@ -15,7 +16,9 @@ class TestService {
         val toteList: MutableList<List<Picking>> = mutableListOf()
         workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
-            createPickingFloor(packingResult)
+            outputDataToCsv(filePath = "./src/main/files/bin-packing_output.csv",
+                workGroupUid = workGroup.workGroupUid,
+                packingTotes = packingResult.packingTote)
             }
         }
 
@@ -23,7 +26,6 @@ class TestService {
         val sampleDataFile = File(fileUrl)
         val reader = BufferedReader(FileReader(sampleDataFile, Charsets.UTF_8))
 
-        //Dictionary<Int, List<SkuInfo>>
         val orderList = mutableMapOf<String, MutableList<SkuInfo>>()
 
         reader.lines().forEach {row ->
@@ -48,6 +50,38 @@ class TestService {
         }
 
         return orderList
+    }
+
+    private fun outputDataToCsv(filePath: String, workGroupUid: String, packingTotes: PackingService.PackingTote) {
+        var outputRows: MutableList<OutputRow> = mutableListOf()
+
+        packingTotes.totes.forEach{ tote ->
+            tote.items.forEach { item ->
+
+                val row = OutputRow(
+                    workGroupId = workGroupUid,
+                    toteId = tote.name,
+                    skuId = item.id,
+                    width = item.width.toString(),
+                    height = item.height.toString(),
+                    depth = item.depth.toString(),
+                    weight = item.weight.toString(),
+                    positionX = item.position[0].toString(),
+                    positionY = item.position[1].toString(),
+                    positionZ = item.position[2].toString()
+                )
+
+                outputRows.add(row)
+            }
+        }
+
+        FileWriter(filePath, true).use { writer ->
+            outputRows.forEach { row -> writer.append(
+                "${row.workGroupId},${row.toteId},${row.skuId}," +
+                        "${row.width},${row.height},${row.depth}," +
+                        "${row.positionX},${row.positionY},${row.positionZ}\n"
+            ) }
+        }
     }
 
     private fun testData(): List<SkuInfo> {
