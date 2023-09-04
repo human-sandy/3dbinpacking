@@ -1,13 +1,16 @@
 package com.example.binpacking.service
 
-import com.example.binpacking.entity.*
+import com.example.binpacking.entity.DEFAULT_NUMBER_OF_DECIMALS
+import com.example.binpacking.entity.Item
+import com.example.binpacking.entity.Tote
+import com.example.binpacking.entity.ToteSpec
 
 class PackingService {
     val packingTote = PackingTote()
     val packingItem = PackingItem()
     val singleItemPacking = PackingTote()
 
-    class PackingTote{
+    class PackingTote {
         var totes: MutableList<Tote> = mutableListOf()
         private var totalTotes: Int = 0
 
@@ -35,11 +38,12 @@ class PackingService {
 
         fun addItem(item: Item) {
             for (index in 0 until item.quantity) {
-            // item 개별 확인용
+                // item 개별 확인용
                 totalItems += 1
                 val individualItem = item.copy()
                 individualItem.getDimension()
-                items.add(individualItem)}
+                items.add(individualItem)
+            }
         }
     }
 
@@ -47,7 +51,7 @@ class PackingService {
     private fun countDuplicates(targetList: MutableList<String>): Map<String, Int> {
         val occurrenceMap = mutableMapOf<String, Int>()
 
-        targetList.forEach {name ->
+        targetList.forEach { name ->
             occurrenceMap[name] = occurrenceMap.getOrDefault(name, 0) + 1
         }
 
@@ -56,35 +60,26 @@ class PackingService {
 
     fun pack(
         biggerFirst: Boolean = true,
-        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
+        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS,
+        algorithm: Algorithm
     ) {
+        val algorithmService = AlgorithmService()
         if (biggerFirst)
             packingItem.items.sortedBy { it.getArea() }
 
         packingItem.items.map { item ->
-                var packed = false
-
-                if (packingTote.totes.isEmpty()) {
-                    packingTote.addTote()
-                }
-
-                for (tote in packingTote.totes) {
-                    if (tote.putItem(item)) {
-                        tote.items.add(item)
-                        packed = true
-                        break
-                    } else
-                        tote.unfittedItems.add(item)
-                }
-
-                if (!packed) {
-                    with(packingTote) {
-                        this.addTote()
-                        this.totes.last().putItem(item)
-                        this.totes.last().items.add(item)
-                    }
-                }
+            if (packingTote.totes.isEmpty()) {
+                packingTote.addTote()
             }
+
+            when (algorithm) {
+                Algorithm.OLD -> println("OLD")
+                Algorithm.FFD -> {
+                    algorithmService.packingWithFFD(packingTote, item)
+                }
+                Algorithm.BFD -> println("BFD")
+            }
+        }
 
         groupItemsInTote()
     }
