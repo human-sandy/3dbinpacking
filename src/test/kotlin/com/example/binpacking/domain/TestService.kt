@@ -2,24 +2,52 @@ package com.example.binpacking.domain
 
 import com.example.binpacking.entity.Item
 import com.example.binpacking.service.PackingService
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileReader
+import java.util.Dictionary
 import kotlin.random.Random
 
 class TestService {
     val workGroupList: List<WorkGroupInfo> = createWorkGroupList()
-    val toteList: List<List<Picking>> = runningTest()
 
-    private fun runningTest(): MutableList<List<Picking>> {
+    fun runningTest() {
         val toteList: MutableList<List<Picking>> = mutableListOf()
         workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
-            val totes = createPickingGroups(packingResult, workGroup.workGroupUid)
-
-            totes.map { tote ->
-                toteList.add(tote)
+            createPickingFloor(packingResult)
             }
         }
 
-        return toteList
+    private fun csvData(fileUrl: String): MutableMap<String, MutableList<SkuInfo>> {
+        val sampleDataFile = File(fileUrl)
+        val reader = BufferedReader(FileReader(sampleDataFile, Charsets.UTF_8))
+
+        //Dictionary<Int, List<SkuInfo>>
+        val orderList = mutableMapOf<String, MutableList<SkuInfo>>()
+
+        reader.lines().forEach {row ->
+            val data = row.split(",")
+            val workGroupUid = data[0]
+            val cbmw = CbmwInfo(
+                width = data[4].toDouble(),
+                height = data[5].toDouble(),
+                depth = data[6].toDouble(),
+                weight = data[7].toDouble()
+            )
+            val sku = SkuInfo(
+                skuUid = data[1],
+                quantity = data[2].toInt(),
+                locationCode = data[3],
+                cbmw = cbmw
+            )
+            if (!orderList.containsKey(workGroupUid))
+                orderList[workGroupUid] = mutableListOf(sku)
+            else
+                orderList[workGroupUid]?.add(sku)
+        }
+
+        return orderList
     }
 
     private fun testData(): List<SkuInfo> {
@@ -73,13 +101,24 @@ class TestService {
     }
 
     private fun createWorkGroupList(): List<WorkGroupInfo> {
-        val skuList = testbedData()
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
 
+        /*val skuList = testbedData()
         val workGroupNumber = Random.nextInt(1, 5)
 
         for (workGroupCount in 1 until workGroupNumber + 1) {
             val workGroupInfo = createWorkGroup(skuList, workGroupCount)
+            workGroupList.add(workGroupInfo)
+        }*/
+
+        val orderList = csvData(fileUrl = "./src/main/files/sample_0803.csv")
+
+        orderList.map { workGroup ->
+            val workGroupInfo = WorkGroupInfo(
+                workGroupUid = workGroup.key,
+                skus = workGroup.value
+            )
+
             workGroupList.add(workGroupInfo)
         }
 
@@ -110,38 +149,14 @@ class TestService {
         return packer
     }
 
-    private fun createPickingGroups(packingResult: PackingService, workGroupUid: String): List<List<Picking>> {
-        val totes: MutableList<List<Picking>> = mutableListOf()
-
-        packingResult.packingTote.totes.map { tote ->
-            val pickingGroup = mutableListOf<Picking>()
-            val thisTote = mutableListOf<Picking>()
-            val nameList = mutableListOf<String>()
-            val skuInfo = mutableMapOf<String, List<String>>()
-
-            tote.items.map { item ->
-                nameList.add(item.name)
-
-                if (!skuInfo.containsKey(item.name)) {
-                    skuInfo[item.name] = arrayListOf(item.id, item.location)
-                }
+    private fun createPickingFloor(packing: PackingService) {
+        packing.packingTote.totes.forEach { tote ->
+            println("===================== [" + tote.name + "] =====================")
+            println("total "+tote.items.size+" items")
+            tote.items.forEach { item ->
+                println(item.id + " / " + item.position + " + " + item.getDimension())
             }
-
-            skuInfo.map { sku ->
-                val quantity = nameList.count { name -> name == sku.key }
-                val pickingSku = PickingSku(
-                    skuUid = skuInfo[sku.key]!![0],
-                    quantity = quantity
-                )
-                val picking = Picking(workGroupUid, pickingSku)
-                pickingGroup.add(picking)
-            }
-
-            pickingGroup.map { picking -> thisTote.add(picking) }
-
-            totes.add(thisTote)
+            println()
         }
-
-        return totes
     }
 }

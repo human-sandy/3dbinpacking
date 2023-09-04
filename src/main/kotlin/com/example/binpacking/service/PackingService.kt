@@ -33,14 +33,18 @@ class PackingService {
         private var totalItems: Int = 0
 
         fun addItem(item: Item) {
-            totalItems += 1
-            items.add(item)
+            for (index in 0 until item.quantity) {
+                // item 개별 확인용
+                totalItems += 1
+                val individualItem = item.copy()
+                items.add(individualItem)}
         }
     }
 
     private fun checkFit(tote: Tote, item: Item): Boolean {
         var fitted = false
 
+        // 한 토트 안에서의 경우
         if (tote.items.isEmpty()) {
             val response = tote.putItem(item, START_POSITION)
             fitted = true
@@ -54,7 +58,7 @@ class PackingService {
             for (axis in 0 until 4) {
                 fitted = pivotThreeDimensions(tote, item, axis)
 
-                if (fitted)
+                if (fitted) // 하나만 fit 해도 ok
                     break
             }
 
@@ -100,7 +104,7 @@ class PackingService {
             if (tote.putItem(item, pivot)) {
                 fitted = true
                 break
-            }
+            } // 아이템이 적재될 수 있는지 확인할 때 아이템의 길이가 2번 더해짐
         }
         return fitted
     }
@@ -114,7 +118,7 @@ class PackingService {
         }
 
         return true
-    }
+    } // tote를 더해주는 역할만 함
 
     fun pack(
         biggerFirst: Boolean = false,
@@ -129,7 +133,6 @@ class PackingService {
         packingTote.addTote()
 
         packingItem.items.map { item ->
-            for (index in 0 until item.quantity) {
                 val sku = item.copy()
                 sku.quantity = 1
                 val response = packToTote(sku, packingTote.totes)
@@ -139,4 +142,4 @@ class PackingService {
             }
         }
     }
-}
+

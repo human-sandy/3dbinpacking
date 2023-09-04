@@ -23,7 +23,7 @@ object Axis {
 }
 
 class ToteSpec(
-    margin: Double, // 0.0 ~ 1.0, ex) 0.8
+    margin: Double = 0.0, // 0.0 ~ 1.0, ex) 0.8 #
 ) {
     val width: Double = 385 * (1 - margin)
     val height: Double = 200 * (1 - margin)
