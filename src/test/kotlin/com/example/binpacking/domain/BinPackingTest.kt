@@ -11,9 +11,9 @@ class BinPackingTest {
         val testService = TestService()
 
         testService.workGroupList.map { workGroup ->
-            println("=============== ${workGroup.workGroupUid} ===============")
+            println("=============== Workgroup: ${workGroup.workGroupUid} ===============")
             workGroup.skus.forEach { work ->
-                println("[" + work.skuUid + "] " + work.locationCode + " / " + work.quantity)
+                println("[item_sku: " + work.skuUid + "] location_code: " + work.locationCode + " / quantity: " + work.quantity)
             }
             println()
         }

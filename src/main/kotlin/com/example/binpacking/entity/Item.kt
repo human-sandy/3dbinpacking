@@ -26,6 +26,7 @@ class Item(
                 else -> 0
             }
         })
+
         this.depth = dim[0]
         this.width = dim[1]
         this.height = dim[2]
