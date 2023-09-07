@@ -92,10 +92,10 @@ class PackingService {
             val skuInfo = mutableMapOf<String, List<String>>()
 
             tote.items.map { item ->
-                idList.add(item.id)
+                idList.add(item.skuId)
 
-                if (!skuInfo.containsKey(item.id)) {
-                    skuInfo[item.id] = arrayListOf(item.id, item.location)
+                if (!skuInfo.containsKey(item.skuId)) {
+                    skuInfo[item.skuId] = arrayListOf(item.skuId, item.location)
                     wholeItems.add(item.copy())
                 }
             }
@@ -105,7 +105,7 @@ class PackingService {
 
             duplicatesCount.map { sku ->
                 val quantity = sku.value
-                val existingItem = wholeItems.find { item -> item.id == sku.key }
+                val existingItem = wholeItems.find { item -> item.skuId == sku.key }
 
                 if (existingItem != null) {
                     existingItem.quantity = quantity

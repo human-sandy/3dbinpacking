@@ -91,7 +91,7 @@ class TestService {
                 val row = OutputRow(
                     workGroupId = workGroupUid,
                     toteId = tote.name,
-                    skuId = item.id,
+                    skuId = item.skuId,
                     width = item.width.toString(),
                     height = item.height.toString(),
                     depth = item.depth.toString(),
@@ -171,17 +171,6 @@ class TestService {
 
     private fun createWorkGroupList(): List<WorkGroupInfo> {
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
-        /* val orderList = csvData(fileUrl = "./src/main/files/sample_0803.csv")
-
-        orderList.map { workGroup ->
-            val workGroupInfo = WorkGroupInfo(
-                workGroupUid = workGroup.key,
-                skus = workGroup.value
-            )
-
-            workGroupList.add(workGroupInfo)
-        }*/
-
         val skuList = testbedData()
         val workGroupNumber = Random.nextInt(1, 5)
 
@@ -199,14 +188,15 @@ class TestService {
         workGroup.skus.map { sku ->
             val name = sku.locationCode + "_" + sku.skuUid
             val item = Item(
-                sku.skuUid,
-                sku.locationCode,
-                name,
-                sku.cbmw.width,
-                sku.cbmw.height,
-                sku.cbmw.depth,
-                sku.cbmw.weight,
-                sku.quantity
+                skuId = sku.skuUid,
+                location = sku.locationCode,
+                name = name,
+                length1 = sku.cbmw.width,
+                length2 = sku.cbmw.height,
+                length3 = sku.cbmw.depth,
+                weight = sku.cbmw.weight,
+                quantity = sku.quantity,
+                workId = ""
             )
             item.getDimension()
             packer.packingItem.addItem(item)
@@ -223,7 +213,7 @@ class TestService {
             println("===================== [" + tote.name + "] =====================")
             println("total "+tote.items.size+" items")
             tote.items.forEach { item ->
-                println(item.id + " / " + item.position+ " + " + listOf(item.width, item.depth, item.height))
+                println(item.skuId + " / " + item.position+ " + " + listOf(item.width, item.depth, item.height))
             }
             println()
         }
