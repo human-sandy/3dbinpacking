@@ -1,11 +1,12 @@
 package com.example.binpacking.domain
 
 import com.example.binpacking.entity.Item
+import com.example.binpacking.service.Algorithm
 import com.example.binpacking.service.PackingService
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
-import java.util.Dictionary
+import java.io.FileWriter
 import kotlin.random.Random
 
 class TestService {
@@ -13,19 +14,19 @@ class TestService {
 
     fun runningTest() {
         val toteList: MutableList<List<Picking>> = mutableListOf()
+
         workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
-            createPickingFloor(packingResult)
+            outputDataToCsv(filePath = "./src/main/files/bin-packing_output.csv",
+                workGroupUid = workGroup.workGroupUid,
+                packingTotes = packingResult.packingTote)
         }
     }
 
-    // order_id,sku_id,request_quantity,location_code,
-    // width,height,depth,weight
-    private fun csvData(fileUrl: String): MutableMap<String, MutableList<SkuInfo>> {
+    private fun inputFromCsvData(fileUrl: String): MutableMap<String, MutableList<SkuInfo>> {
         val sampleDataFile = File(fileUrl)
         val reader = BufferedReader(FileReader(sampleDataFile, Charsets.UTF_8))
 
-        //Dictionary<Int, List<SkuInfo>>
         val orderList = mutableMapOf<String, MutableList<SkuInfo>>()
 
         reader.lines().forEach {row ->
@@ -50,6 +51,67 @@ class TestService {
         }
 
         return orderList
+    }
+
+    private fun inputDataToCsv(inputData: List<WorkGroupInfo>, filePath: String) {
+        var inputRows: MutableList<InputRow> = mutableListOf()
+
+        inputData.forEach { workGroup ->
+            val workGroupUid = workGroup.workGroupUid
+            workGroup.skus.forEach { sku ->
+                val row = InputRow(
+                    workGroupUid,
+                    sku.skuUid,
+                    sku.quantity.toString(),
+                    sku.locationCode,
+                    sku.cbmw.width.toString(),
+                    sku.cbmw.height.toString(),
+                    sku.cbmw.depth.toString(),
+                    sku.cbmw.weight.toString()
+                )
+
+                inputRows.add(row)
+            }
+        }
+
+        FileWriter(filePath, true).use { writer ->
+            inputRows.forEach { row -> writer.append(
+                "${row.workGroupId},${row.skuId},${row.quantity},${row.locationCode}" +
+                        ",${row.width},${row.height},${row.depth},${row.weight}\n"
+            ) }
+        }
+    }
+
+    private fun outputDataToCsv(filePath: String, workGroupUid: String, packingTotes: PackingService.PackingTote) {
+        var outputRows: MutableList<OutputRow> = mutableListOf()
+
+        packingTotes.totes.forEach{ tote ->
+            tote.items.forEach { item ->
+
+                val row = OutputRow(
+                    workGroupId = workGroupUid,
+                    toteId = tote.name,
+                    skuId = item.skuId,
+                    width = item.width.toString(),
+                    height = item.height.toString(),
+                    depth = item.depth.toString(),
+                    weight = item.weight.toString(),
+                    positionX = item.position[0].toString(),
+                    positionY = item.position[1].toString(),
+                    positionZ = item.position[2].toString()
+                )
+
+                outputRows.add(row)
+            }
+        }
+
+        FileWriter(filePath, true).use { writer ->
+            outputRows.forEach { row -> writer.append(
+                "${row.workGroupId},${row.toteId},${row.skuId}," +
+                        "${row.width},${row.height},${row.depth}," +
+                        "${row.positionX},${row.positionY},${row.positionZ}\n"
+            ) }
+        }
     }
 
     private fun testData(): List<SkuInfo> {
@@ -109,17 +171,6 @@ class TestService {
 
     private fun createWorkGroupList(): List<WorkGroupInfo> {
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
-        /* val orderList = csvData(fileUrl = "./src/main/files/sample_0803.csv")
-
-        orderList.map { workGroup ->
-            val workGroupInfo = WorkGroupInfo(
-                workGroupUid = workGroup.key,
-                skus = workGroup.value
-            )
-
-            workGroupList.add(workGroupInfo)
-        }*/
-
         val skuList = testbedData()
         val workGroupNumber = Random.nextInt(1, 5)
 
@@ -137,21 +188,22 @@ class TestService {
         workGroup.skus.map { sku ->
             val name = sku.locationCode + "_" + sku.skuUid
             val item = Item(
-                sku.skuUid,
-                sku.locationCode,
-                name,
-                sku.cbmw.width,
-                sku.cbmw.height,
-                sku.cbmw.depth,
-                sku.cbmw.weight,
-                sku.quantity
+                skuId = sku.skuUid,
+                location = sku.locationCode,
+                name = name,
+                length1 = sku.cbmw.width,
+                length2 = sku.cbmw.height,
+                length3 = sku.cbmw.depth,
+                weight = sku.cbmw.weight,
+                quantity = sku.quantity,
+                workId = ""
             )
             item.getDimension()
             packer.packingItem.addItem(item)
 
         }
 
-        packer.pack()
+        packer.pack(algorithm = Algorithm.FFD)
 
         return packer
     }
@@ -161,7 +213,7 @@ class TestService {
             println("===================== [" + tote.name + "] =====================")
             println("total "+tote.items.size+" items")
             tote.items.forEach { item ->
-                println(item.id + " / " + item.position+ " + " + listOf(item.width, item.depth, item.height))
+                println(item.skuId + " / " + item.position+ " + " + listOf(item.width, item.depth, item.height))
             }
             println()
         }

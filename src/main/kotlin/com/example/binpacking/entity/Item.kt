@@ -3,11 +3,12 @@ package com.example.binpacking.entity
 import com.example.binpacking.setToDecimal
 class Item(
     //아이템 정보 매개 변수
-    val id: String,
+    val skuId: String,
     val location: String,
     val name: String,
     var length1: Double, var length2: Double, var length3: Double, var weight: Double,
-    var quantity: Int
+    var quantity: Int,
+    val workId: String
 ) {
     //아이템 프로퍼티
     var rotationType: Int = 0 // default: width is longer than depth
@@ -66,10 +67,13 @@ class Item(
     } //밑면 면적 반환
 
     fun copy(): Item {
-        return Item(id, location, name, width, height, depth, weight, quantity)
+        return Item(skuId, location, name, width, height, depth, weight, quantity, workId)
     }
 
     override fun toString(): String {
-        return "Item(id='$id', location='$location', name='$name', width=$width, height=$height, depth=$depth, weight=$weight, quantity=$quantity, rotationType=$rotationType, position=$position, numberOfDecimals=$numberOfDecimals)"
+        return "Item(skuId='$skuId', location='$location', name='$name'," +
+                " width=$width, height=$height, depth=$depth, weight=$weight," +
+                " quantity=$quantity, rotationType=$rotationType, position=$position," +
+                " numberOfDecimals=$numberOfDecimals)"
     }
 }
