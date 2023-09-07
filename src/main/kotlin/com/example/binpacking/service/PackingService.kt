@@ -1,13 +1,16 @@
 package com.example.binpacking.service
 
-import com.example.binpacking.entity.*
+import com.example.binpacking.entity.DEFAULT_NUMBER_OF_DECIMALS
+import com.example.binpacking.entity.Item
+import com.example.binpacking.entity.Tote
+import com.example.binpacking.entity.ToteSpec
 
 class PackingService {
     val packingTote = PackingTote()
     val packingItem = PackingItem()
     val singleItemPacking = PackingTote()
 
-    class PackingTote{
+    class PackingTote {
         var totes: MutableList<Tote> = mutableListOf()
         private var totalTotes: Int = 0
 
@@ -34,8 +37,13 @@ class PackingService {
         private var totalItems: Int = 0
 
         fun addItem(item: Item) {
-            totalItems += 1
-            items.add(item)
+            for (index in 0 until item.quantity) {
+                // item 개별 확인용
+                totalItems += 1
+                val individualItem = item.copy()
+                individualItem.getDimension()
+                items.add(individualItem)
+            }
         }
     }
 
@@ -43,7 +51,7 @@ class PackingService {
     private fun countDuplicates(targetList: MutableList<String>): Map<String, Int> {
         val occurrenceMap = mutableMapOf<String, Int>()
 
-        targetList.forEach {name ->
+        targetList.forEach { name ->
             occurrenceMap[name] = occurrenceMap.getOrDefault(name, 0) + 1
         }
 
@@ -52,35 +60,24 @@ class PackingService {
 
     fun pack(
         biggerFirst: Boolean = true,
-        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
+        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS,
+        algorithm: Algorithm
     ) {
+        val algorithmService = AlgorithmService()
         if (biggerFirst)
             packingItem.items.sortedBy { it.getArea() }
 
         packingItem.items.map { item ->
-            for (index in 0 until item.quantity) {
-                var packed = false
+            if (packingTote.totes.isEmpty()) {
+                packingTote.addTote()
+            }
 
-                if (packingTote.totes.isEmpty()) {
-                    packingTote.addTote()
+            when (algorithm) {
+                Algorithm.OLD -> println("OLD")
+                Algorithm.FFD -> {
+                    algorithmService.packingWithFFD(packingTote, item)
                 }
-
-                for (tote in packingTote.totes) {
-                    if (tote.putItem(item)) {
-                        tote.items.add(item)
-                        packed = true
-                        break
-                    } else
-                        tote.unfittedItems.add(item)
-                }
-
-                if (!packed) {
-                    with(packingTote) {
-                        this.addTote()
-                        this.totes.last().putItem(item)
-                        this.totes.last().items.add(item)
-                    }
-                }
+                Algorithm.BFD -> println("BFD")
             }
         }
 
@@ -95,10 +92,10 @@ class PackingService {
             val skuInfo = mutableMapOf<String, List<String>>()
 
             tote.items.map { item ->
-                idList.add(item.id)
+                idList.add(item.skuId)
 
-                if (!skuInfo.containsKey(item.id)) {
-                    skuInfo[item.id] = arrayListOf(item.id, item.location)
+                if (!skuInfo.containsKey(item.skuId)) {
+                    skuInfo[item.skuId] = arrayListOf(item.skuId, item.location)
                     wholeItems.add(item.copy())
                 }
             }
@@ -108,7 +105,7 @@ class PackingService {
 
             duplicatesCount.map { sku ->
                 val quantity = sku.value
-                val existingItem = wholeItems.find { item -> item.id == sku.key }
+                val existingItem = wholeItems.find { item -> item.skuId == sku.key }
 
                 if (existingItem != null) {
                     existingItem.quantity = quantity
