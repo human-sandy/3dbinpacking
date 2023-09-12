@@ -65,7 +65,7 @@ class PackingService {
     ) {
         val algorithmService = AlgorithmService()
         if (biggerFirst)
-            packingItem.items.sortedBy { it.getArea() }
+            packingItem.items.sortedByDescending { it.getArea() }
 
         packingItem.items.map { item ->
             if (singleItemPackingTote.totes.isEmpty()) {
@@ -93,7 +93,7 @@ class PackingService {
     ) {
         val algorithmService = AlgorithmService()
         if (biggerFirst)
-            packingItem.items.sortedBy { it.getArea() }
+            packingItem.items.sortedByDescending { it.getArea() }
 
         packingItem.items.map { item ->
             if (singleItemPackingTote.totes.isEmpty()) {
