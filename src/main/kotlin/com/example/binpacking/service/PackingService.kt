@@ -47,7 +47,6 @@ class PackingService {
         }
     }
 
-
     private fun countDuplicates(targetList: MutableList<String>): Map<String, Int> {
         val occurrenceMap = mutableMapOf<String, Int>()
 

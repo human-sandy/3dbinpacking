@@ -17,7 +17,7 @@ class TestService {
 
         workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
-            outputDataToCsv(filePath = "./src/main/files/bfd-bin-packing_output.csv",
+            outputDataToCsv(filePath = "./src/main/files/0630_output_not_intersect.csv",
                 workGroupUid = workGroup.workGroupUid,
                 packingTotes = packingResult.singleItemPackingTote)
         }
@@ -108,7 +108,7 @@ class TestService {
         FileWriter(filePath, true).use { writer ->
             outputRows.forEach { row -> writer.append(
                 "${row.workGroupId},${row.toteId},${row.skuId}," +
-                        "${row.width},${row.height},${row.depth}," +
+                        "${row.width},${row.depth},${row.height}," +
                         "${row.positionX},${row.positionY},${row.positionZ}\n"
             ) }
         }
@@ -214,7 +214,7 @@ class TestService {
 
         }
 
-        packer.packForTest(algorithm = Algorithm.BFD)
+        packer.packForTest(algorithm = Algorithm.FFD)
 
         return packer
     }
