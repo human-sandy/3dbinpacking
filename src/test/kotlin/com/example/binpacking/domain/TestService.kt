@@ -19,7 +19,7 @@ class TestService {
             val packingResult = createPicking(workGroup)
             outputDataToCsv(filePath = "./src/main/files/bin-packing_output.csv",
                 workGroupUid = workGroup.workGroupUid,
-                packingTotes = packingResult.packingTote)
+                packingTotes = packingResult.singleItemPackingTote)
         }
     }
 
@@ -203,7 +203,8 @@ class TestService {
 
         }
 
-        packer.pack(algorithm = Algorithm.FFD)
+        //packer.pack(algorithm = Algorithm.FFD)
+        packer.packForTest(algorithm = Algorithm.FFD)
 
         return packer
     }
