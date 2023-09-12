@@ -64,24 +64,23 @@ class PackingService {
         algorithm: Algorithm
     ) {
         val algorithmService = AlgorithmService()
-        if (biggerFirst)
-            packingItem.items.sortedBy { it.getArea() }
 
-        packingItem.items.map { item ->
-            if (packingTote.totes.isEmpty()) {
-                packingTote.addTote()
-            }
+        if (biggerFirst)
+            packingItem.items.sortedByDescending { it.getArea() }
 
             when (algorithm) {
                 Algorithm.OLD -> println("OLD")
                 Algorithm.FFD -> {
-                    algorithmService.packingWithFFD(packingTote, item)
+                    algorithmService.packingWithFFD(packingTote, packingItem)
                 }
                 Algorithm.BFD -> {
-                    algorithmService.packingWithBFD(packingTote, item)
+                    algorithmService.packingWithBFD(packingTote, packingItem)
+                }
+
+                Algorithm.MFk -> {
+                    algorithmService.packingWithMFk(packingTote, packingItem, 1)
                 }
             }
-        }
 
         groupItemsInTote()
     }
