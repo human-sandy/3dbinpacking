@@ -15,6 +15,7 @@ class Tote(
     private val priorPivot: List<Double> = listOf(0.0, 0.0, 0.0)
     private var pivots: LinkedList<List<Double>> = LinkedList(listOf(priorPivot))
     private var vertexs = LinkedList<List<Double>>()
+    var availSpace = width * height * depth
 
 
     private fun getTotalWeight(): Double {

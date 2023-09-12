@@ -27,4 +27,31 @@ class AlgorithmService {
             }
         }
     }
+
+    fun packingWithBFD(packingTote: PackingService.PackingTote, packingItem: Item) {
+        var packed = false
+
+        packingTote.totes.sortedBy { it.availSpace }
+
+        for (tote in packingTote.totes) {
+            if (tote.putItem(packingItem)) {
+                tote.items.add(packingItem)
+                packed = true
+                if (packed) {
+                    tote.availSpace -= packingItem.getVolume()
+                }
+                break
+            }
+            else tote.unfittedItems.add(packingItem)
+        }
+
+        if (!packed) {
+            with(packingTote) {
+                this.addTote()
+                this.totes.last().putItem(packingItem)
+                this.totes.last().items.add(packingItem)
+            }
+        }
+    }
+
 }
