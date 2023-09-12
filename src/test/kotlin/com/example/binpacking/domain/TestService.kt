@@ -214,12 +214,7 @@ class TestService {
 
         }
 
-<<<<<<< HEAD
-        //packer.pack(algorithm = Algorithm.FFD)
-        packer.packForTest(algorithm = Algorithm.FFD)
-=======
-        packer.pack(algorithm = Algorithm.BFD)
->>>>>>> new-algorithm
+        packer.packForTest(algorithm = Algorithm.BFD)
 
         return packer
     }
