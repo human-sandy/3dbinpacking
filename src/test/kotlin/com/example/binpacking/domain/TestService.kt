@@ -17,9 +17,9 @@ class TestService {
 
         workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
-            outputDataToCsv(filePath = "./src/main/files/bin-packing_output.csv",
+            outputDataToCsv(filePath = "./src/main/files/bfd-bin-packing_output.csv",
                 workGroupUid = workGroup.workGroupUid,
-                packingTotes = packingResult.packingTote)
+                packingTotes = packingResult.singleItemPackingTote)
         }
     }
 
@@ -172,7 +172,7 @@ class TestService {
     private fun createWorkGroupList(): List<WorkGroupInfo> {
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
 
-        val orderList = inputFromCsvData(fileUrl = "./src/main/files/sample_0711.csv")
+        val orderList = inputFromCsvData(fileUrl = "./src/main/files/sample_0630.csv")
 
         orderList.map { workGroup ->
             val WorkGroupInfo = WorkGroupInfo(
@@ -214,7 +214,7 @@ class TestService {
 
         }
 
-        packer.pack(algorithm = Algorithm.FFD)
+        packer.packForTest(algorithm = Algorithm.BFD)
 
         return packer
     }
