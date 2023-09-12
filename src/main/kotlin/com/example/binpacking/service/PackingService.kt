@@ -77,7 +77,9 @@ class PackingService {
                 Algorithm.FFD -> {
                     algorithmService.packingWithFFD(singleItemPackingTote, item)
                 }
-                Algorithm.BFD -> println("BFD")
+                Algorithm.BFD -> {
+                    algorithmService.packingWithBFD(packingTote, item)
+                }
             }
         }
 
