@@ -8,7 +8,7 @@ import com.example.binpacking.entity.ToteSpec
 class PackingService {
     val packingTote = PackingTote()
     val packingItem = PackingItem()
-    val singleItemPacking = PackingTote()
+    val singleItemPackingTote = PackingTote()
 
     class PackingTote {
         var totes: MutableList<Tote> = mutableListOf()
@@ -64,29 +64,55 @@ class PackingService {
         algorithm: Algorithm
     ) {
         val algorithmService = AlgorithmService()
-
         if (biggerFirst)
-            packingItem.items.sortedByDescending { it.getArea() }
+            packingItem.items.sortedBy { it.getArea() }
+
+        packingItem.items.map { item ->
+            if (singleItemPackingTote.totes.isEmpty()) {
+                singleItemPackingTote.addTote()
+            }
 
             when (algorithm) {
                 Algorithm.OLD -> println("OLD")
                 Algorithm.FFD -> {
-                    algorithmService.packingWithFFD(packingTote, packingItem)
+                    algorithmService.packingWithFFD(singleItemPackingTote, item)
                 }
                 Algorithm.BFD -> {
-                    algorithmService.packingWithBFD(packingTote, packingItem)
-                }
-
-                Algorithm.MFk -> {
-                    algorithmService.packingWithMFk(packingTote, packingItem, 1)
+                    algorithmService.packingWithBFD(packingTote, item)
                 }
             }
+        }
 
         groupItemsInTote()
     }
 
+    fun packForTest(
+        biggerFirst: Boolean = true,
+        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS,
+        algorithm: Algorithm
+    ) {
+        val algorithmService = AlgorithmService()
+        if (biggerFirst)
+            packingItem.items.sortedBy { it.getArea() }
+
+        packingItem.items.map { item ->
+            if (singleItemPackingTote.totes.isEmpty()) {
+                singleItemPackingTote.addTote()
+            }
+
+            when (algorithm) {
+                Algorithm.OLD -> println("OLD")
+                Algorithm.FFD -> {
+                    algorithmService.packingWithFFD(singleItemPackingTote, item)
+                }
+                Algorithm.BFD -> println("BFD")
+            }
+        }
+    }
+
+
     private fun groupItemsInTote() {
-        singleItemPacking.totes.map { tote ->
+        singleItemPackingTote.totes.map { tote ->
             val wholeItems = mutableListOf<Item>()
             val distinctItems = mutableListOf<Item>()
             val idList = mutableListOf<String>()
