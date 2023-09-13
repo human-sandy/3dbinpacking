@@ -17,7 +17,7 @@ class TestService {
 
         workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
-            outputDataToCsv(filePath = "./src/main/files/0630_output_not_intersect.csv",
+            outputDataToCsv(filePath = "./src/main/files/0630_output.csv",
                 workGroupUid = workGroup.workGroupUid,
                 packingTotes = packingResult.singleItemPackingTote)
         }
@@ -172,7 +172,7 @@ class TestService {
     private fun createWorkGroupList(): List<WorkGroupInfo> {
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
 
-        val orderList = inputFromCsvData(fileUrl = "./src/main/files/sample_0630.csv")
+        val orderList = inputFromCsvData(fileUrl = "./src/main/files/sample_one-workgroup.csv")
 
         orderList.map { workGroup ->
             val WorkGroupInfo = WorkGroupInfo(

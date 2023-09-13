@@ -3,55 +3,96 @@ package com.example.binpacking.service
 import com.example.binpacking.entity.Item
 
 enum class Algorithm {
-    OLD, FFD, BFD
+    OLD, FFD, BFD, MFK
 }
 
 class AlgorithmService {
-    fun packingWithFFD(packingTote: PackingService.PackingTote, packingItem: Item) {
-        var packed = false
+    fun packingWithFFD(singleItemPackingTote: PackingService.PackingTote, packingItem: PackingService.PackingItem) {
 
-        for (tote in packingTote.totes) {
-            if (tote.putItem(packingItem)) {
-                tote.items.add(packingItem)
-                packed = true
-                break
+        packingItem.items.map { item ->
+            if (singleItemPackingTote.totes.isEmpty()) {
+                singleItemPackingTote.addTote()
             }
-            else tote.unfittedItems.add(packingItem)
-        }
 
-        if (!packed) {
-            with(packingTote) {
-                this.addTote()
-                this.totes.last().putItem(packingItem)
-                this.totes.last().items.add(packingItem)
-            }
-        }
-    }
+                var packed = false
 
-    fun packingWithBFD(packingTote: PackingService.PackingTote, packingItem: Item) {
-        var packed = false
-
-        packingTote.totes.sortedBy { it.availSpace }
-
-        for (tote in packingTote.totes) {
-            if (tote.putItem(packingItem)) {
-                tote.items.add(packingItem)
-                packed = true
-                if (packed) {
-                    tote.availSpace -= packingItem.getVolume()
+                for (tote in singleItemPackingTote.totes) {
+                    if (tote.putItem(item)) {
+                        tote.items.add(item)
+                        packed = true
+                        break
+                    } else tote.unfittedItems.add(item)
                 }
-                break
-            }
-            else tote.unfittedItems.add(packingItem)
-        }
 
-        if (!packed) {
-            with(packingTote) {
-                this.addTote()
-                this.totes.last().putItem(packingItem)
-                this.totes.last().items.add(packingItem)
-            }
+                if (!packed) {
+                    with(singleItemPackingTote) {
+                        this.addTote()
+                        this.totes.last().putItem(item)
+                        this.totes.last().items.add(item)
+                    }
+                }
         }
     }
 
+
+    fun packingWithBFD(singleItemPackingTote: PackingService.PackingTote, packingItem: PackingService.PackingItem) {
+        var packed = false
+
+        packingItem.items.map { item ->
+            if (singleItemPackingTote.totes.isEmpty()) {
+                singleItemPackingTote.addTote()
+            }
+
+                singleItemPackingTote.totes.sortedBy { it.availSpace }
+
+                for (tote in singleItemPackingTote.totes) {
+                    if (tote.putItem(item)) {
+                        tote.items.add(item)
+                        packed = true
+                        tote.availSpace -= item.getVolume()
+                        break
+                    } else tote.unfittedItems.add(item)
+                }
+
+                if (!packed) {
+                    with(singleItemPackingTote) {
+                        this.addTote()
+                        this.totes.last().putItem(item)
+                        this.totes.last().items.add(item)
+                    }
+                }
+
+        }
+    }
+
+    fun packingWithMFK(singleItemPackingTote: PackingService.PackingTote, packingItem: PackingService.PackingItem, k: Int) {
+        var packed = false
+
+        while (packingItem.items.size != 0) {
+            singleItemPackingTote.addTote()
+            val tote = singleItemPackingTote.totes.last()
+
+            with(tote) {
+                for (i in 0 until k) {
+                    if (this.putItem(packingItem.items.first())) {
+                        val item = packingItem.items.removeFirst()
+                        tote.items.add(item)
+                        packed = true
+                    } else break
+                }
+
+                while (this.putItem(packingItem.items.last())) {
+                    val item = packingItem.items.removeLast()
+                    tote.items.add(item)
+                    packed = true
+                    if(packingItem.items.isNotEmpty())
+                        continue
+                    else break
+                }
+                return
+            }
+        }
+    }
 }
+
+

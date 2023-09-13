@@ -65,22 +65,18 @@ class PackingService {
         val algorithmService = AlgorithmService()
         if (biggerFirst)
             packingItem.items.sortedByDescending { it.getArea() }
-
-        packingItem.items.map { item ->
-            if (singleItemPackingTote.totes.isEmpty()) {
-                singleItemPackingTote.addTote()
-            }
-
             when (algorithm) {
                 Algorithm.OLD -> println("OLD")
                 Algorithm.FFD -> {
-                    algorithmService.packingWithFFD(singleItemPackingTote, item)
+                    algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
                 }
                 Algorithm.BFD -> {
-                    algorithmService.packingWithBFD(packingTote, item)
+                    algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
+                }
+                Algorithm.MFK -> {
+                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 1)
                 }
             }
-        }
 
         groupItemsInTote()
     }
@@ -94,21 +90,19 @@ class PackingService {
         if (biggerFirst)
             packingItem.items.sortedByDescending { it.getArea() }
 
-        packingItem.items.map { item ->
-            if (singleItemPackingTote.totes.isEmpty()) {
-                singleItemPackingTote.addTote()
-            }
-
             when (algorithm) {
                 Algorithm.OLD -> println("OLD")
                 Algorithm.FFD -> {
-                    algorithmService.packingWithFFD(singleItemPackingTote, item)
+                    algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
                 }
-                Algorithm.BFD -> println("BFD")
+                Algorithm.BFD -> {
+                    algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
+                    }
+                Algorithm.MFK -> {
+                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 1)
+                }
             }
-        }
     }
-
 
     private fun groupItemsInTote() {
         singleItemPackingTote.totes.map { tote ->
