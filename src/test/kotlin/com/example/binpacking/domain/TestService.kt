@@ -17,7 +17,7 @@ class TestService {
 
         workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
-            outputDataToCsv(filePath = "./src/main/files/0630_output.csv",
+            outputDataToCsv(filePath = "./src/main/files/one-workgroup_MFK3_output.csv",
                 workGroupUid = workGroup.workGroupUid,
                 packingTotes = packingResult.singleItemPackingTote)
         }
@@ -214,7 +214,7 @@ class TestService {
 
         }
 
-        packer.packForTest(algorithm = Algorithm.FFD)
+        packer.packForTest(algorithm = Algorithm.MFK)
 
         return packer
     }

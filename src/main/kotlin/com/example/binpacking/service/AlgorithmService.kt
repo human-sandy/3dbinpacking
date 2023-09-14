@@ -13,60 +13,61 @@ class AlgorithmService {
             if (singleItemPackingTote.totes.isEmpty()) {
                 singleItemPackingTote.addTote()
             }
+            var packed = false
 
-                var packed = false
+            for (tote in singleItemPackingTote.totes) {
+                if (tote.putItem(item)) {
+                    tote.items.add(item)
+                    packed = true
+                    break
+                } else tote.unfittedItems.add(item)
+            }
 
-                for (tote in singleItemPackingTote.totes) {
-                    if (tote.putItem(item)) {
-                        tote.items.add(item)
-                        packed = true
-                        break
-                    } else tote.unfittedItems.add(item)
+            if (!packed) {
+                with(singleItemPackingTote) {
+                    this.addTote()
+                    this.totes.last().putItem(item)
+                    this.totes.last().items.add(item)
                 }
-
-                if (!packed) {
-                    with(singleItemPackingTote) {
-                        this.addTote()
-                        this.totes.last().putItem(item)
-                        this.totes.last().items.add(item)
-                    }
-                }
+            }
         }
     }
 
 
     fun packingWithBFD(singleItemPackingTote: PackingService.PackingTote, packingItem: PackingService.PackingItem) {
-        var packed = false
 
+        println(packingItem.items.size)
         packingItem.items.map { item ->
+            var packed = false
+
             if (singleItemPackingTote.totes.isEmpty()) {
                 singleItemPackingTote.addTote()
             }
 
-                singleItemPackingTote.totes.sortedBy { it.availSpace }
+            singleItemPackingTote.totes.sortedBy { it.availSpace }
 
-                for (tote in singleItemPackingTote.totes) {
-                    if (tote.putItem(item)) {
-                        tote.items.add(item)
-                        packed = true
-                        tote.availSpace -= item.getVolume()
-                        break
-                    } else tote.unfittedItems.add(item)
+            for (tote in singleItemPackingTote.totes) {
+                if (tote.putItem(item)) {
+                    tote.items.add(item)
+                    packed = true
+                    tote.availSpace -= item.getVolume()
+                    break
+                } else tote.unfittedItems.add(item)
+            }
+
+            if (!packed) {
+                with(singleItemPackingTote) {
+                    this.addTote()
+                    this.totes.last().putItem(item)
+                    this.totes.last().items.add(item)
                 }
-
-                if (!packed) {
-                    with(singleItemPackingTote) {
-                        this.addTote()
-                        this.totes.last().putItem(item)
-                        this.totes.last().items.add(item)
-                    }
-                }
-
+            }
         }
+
+
     }
 
     fun packingWithMFK(singleItemPackingTote: PackingService.PackingTote, packingItem: PackingService.PackingItem, k: Int) {
-        var packed = false
 
         while (packingItem.items.size != 0) {
             singleItemPackingTote.addTote()
@@ -77,19 +78,19 @@ class AlgorithmService {
                     if (this.putItem(packingItem.items.first())) {
                         val item = packingItem.items.removeFirst()
                         tote.items.add(item)
-                        packed = true
                     } else break
                 }
+                if(packingItem.items.isEmpty())
+                    return
 
                 while (this.putItem(packingItem.items.last())) {
                     val item = packingItem.items.removeLast()
                     tote.items.add(item)
-                    packed = true
+
                     if(packingItem.items.isNotEmpty())
                         continue
                     else break
                 }
-                return
             }
         }
     }

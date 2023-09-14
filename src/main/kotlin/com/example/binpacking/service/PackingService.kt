@@ -32,7 +32,7 @@ class PackingService {
     }
 
     class PackingItem {
-        val items: MutableList<Item> = mutableListOf()
+        var items: MutableList<Item> = mutableListOf()
         val unfitItems: List<Item> = listOf()
         private var totalItems: Int = 0
 
@@ -64,7 +64,8 @@ class PackingService {
     ) {
         val algorithmService = AlgorithmService()
         if (biggerFirst)
-            packingItem.items.sortedByDescending { it.getArea() }
+            packingItem.items = packingItem.items.sortedByDescending { it.getArea() }.toMutableList()
+
             when (algorithm) {
                 Algorithm.OLD -> println("OLD")
                 Algorithm.FFD -> {
@@ -88,7 +89,7 @@ class PackingService {
     ) {
         val algorithmService = AlgorithmService()
         if (biggerFirst)
-            packingItem.items.sortedByDescending { it.getArea() }
+            packingItem.items = packingItem.items.sortedByDescending { it.getArea() }.toMutableList()
 
             when (algorithm) {
                 Algorithm.OLD -> println("OLD")
@@ -99,7 +100,7 @@ class PackingService {
                     algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
                     }
                 Algorithm.MFK -> {
-                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 1)
+                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 3)
                 }
             }
     }
