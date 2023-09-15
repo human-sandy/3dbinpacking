@@ -11,7 +11,7 @@ class Item(
     val workId: String
 ) {
     //아이템 프로퍼티
-    var rotationType: Int = 0 // default: width is longer than depth
+    var rotationType: Int = 0 // default: depth is longer than width
     var position: MutableList<Double> = mutableListOf(-1.0, -1.0, -1.0)
     private var numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
     var width: Double = 0.0

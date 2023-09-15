@@ -3,8 +3,8 @@ package com.example.binpacking.entity
 const val DEFAULT_NUMBER_OF_DECIMALS: Int = 0
 
 object RotationType{
-    const val LONGER_W = 0
-    const val LONGER_D = 1
+    const val LONGER_D = 0
+    const val LONGER_W = 1
 }
 
 class ToteSpec(
