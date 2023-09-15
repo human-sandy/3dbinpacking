@@ -27,11 +27,11 @@ class Item(
                 else -> 0
             }
         })
-
         this.depth = dim[0]
         this.width = dim[1]
         this.height = dim[2]
-        return dim
+
+        return listOf(this.width, this.depth, this.height)
     } // width, depth, height 확정
 
     fun formatNumbers(numberOfDecimals: Int) {

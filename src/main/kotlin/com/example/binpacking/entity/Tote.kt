@@ -1,5 +1,6 @@
 package com.example.binpacking.entity
 
+import com.example.binpacking.intersect
 import java.util.LinkedList
 
 class Tote(
@@ -24,13 +25,19 @@ class Tote(
 
     private fun checkSize(item:Item, pivot:List<Double>): Boolean {
         var fit = false
+        for (currentItem in items){
+            if(!intersect(currentItem, item, pivot)){
+                continue }
+            else {
+                return fit }
+        }
         if (
             width >= pivot[0] + item.width &&
             depth >= pivot[1] + item.depth &&
             height >= pivot[2] + item.height
-        ) { fit = true
-            return fit}
-        else{ return fit }
+        )
+        fit = true
+        return fit
     }
 
     private fun sumPoints(pivot: List<Double>, gap:List<Double>): List<Double> {

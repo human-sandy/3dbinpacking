@@ -32,7 +32,7 @@ class PackingService {
     }
 
     class PackingItem {
-        val items: MutableList<Item> = mutableListOf()
+        var items: MutableList<Item> = mutableListOf()
         val unfitItems: List<Item> = listOf()
         private var totalItems: Int = 0
 
@@ -46,7 +46,6 @@ class PackingService {
             }
         }
     }
-
 
     private fun countDuplicates(targetList: MutableList<String>): Map<String, Int> {
         val occurrenceMap = mutableMapOf<String, Int>()
@@ -65,23 +64,20 @@ class PackingService {
     ) {
         val algorithmService = AlgorithmService()
         if (biggerFirst)
-            packingItem.items.sortedBy { it.getArea() }
-
-        packingItem.items.map { item ->
-            if (singleItemPackingTote.totes.isEmpty()) {
-                singleItemPackingTote.addTote()
-            }
+            packingItem.items = packingItem.items.sortedByDescending { it.getArea() }.toMutableList()
 
             when (algorithm) {
                 Algorithm.OLD -> println("OLD")
                 Algorithm.FFD -> {
-                    algorithmService.packingWithFFD(singleItemPackingTote, item)
+                    algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
                 }
                 Algorithm.BFD -> {
-                    algorithmService.packingWithBFD(packingTote, item)
+                    algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
+                }
+                Algorithm.MFK -> {
+                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 1)
                 }
             }
-        }
 
         groupItemsInTote()
     }
@@ -93,23 +89,21 @@ class PackingService {
     ) {
         val algorithmService = AlgorithmService()
         if (biggerFirst)
-            packingItem.items.sortedBy { it.getArea() }
-
-        packingItem.items.map { item ->
-            if (singleItemPackingTote.totes.isEmpty()) {
-                singleItemPackingTote.addTote()
-            }
+            packingItem.items = packingItem.items.sortedByDescending { it.getArea() }.toMutableList()
 
             when (algorithm) {
                 Algorithm.OLD -> println("OLD")
                 Algorithm.FFD -> {
-                    algorithmService.packingWithFFD(singleItemPackingTote, item)
+                    algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
                 }
-                Algorithm.BFD -> println("BFD")
+                Algorithm.BFD -> {
+                    algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
+                    }
+                Algorithm.MFK -> {
+                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 3)
+                }
             }
-        }
     }
-
 
     private fun groupItemsInTote() {
         singleItemPackingTote.totes.map { tote ->
