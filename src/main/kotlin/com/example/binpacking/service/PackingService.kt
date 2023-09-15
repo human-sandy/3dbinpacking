@@ -67,7 +67,6 @@ class PackingService {
             packingItem.items = packingItem.items.sortedByDescending { it.getArea() }.toMutableList()
 
             when (algorithm) {
-                Algorithm.OLD -> println("OLD")
                 Algorithm.FFD -> {
                     algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
                 }
@@ -92,7 +91,6 @@ class PackingService {
             packingItem.items = packingItem.items.sortedByDescending { it.getArea() }.toMutableList()
 
             when (algorithm) {
-                Algorithm.OLD -> println("OLD")
                 Algorithm.FFD -> {
                     algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
                 }

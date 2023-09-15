@@ -3,7 +3,7 @@ package com.example.binpacking.service
 import com.example.binpacking.entity.Item
 
 enum class Algorithm {
-    OLD, FFD, BFD, MFK
+    FFD, BFD, MFK
 }
 
 class AlgorithmService {
