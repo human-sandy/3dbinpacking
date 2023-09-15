@@ -36,13 +36,11 @@ class AlgorithmService {
 
     fun packingWithBFD(singleItemPackingTote: PackingService.PackingTote, packingItem: PackingService.PackingItem) {
 
-        println(packingItem.items.size)
         packingItem.items.map { item ->
-            var packed = false
-
             if (singleItemPackingTote.totes.isEmpty()) {
                 singleItemPackingTote.addTote()
             }
+            var packed = false
 
             singleItemPackingTote.totes.sortedBy { it.availSpace }
 
