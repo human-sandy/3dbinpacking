@@ -3,6 +3,8 @@ package com.example.binpacking.domain
 import com.example.binpacking.entity.Item
 import com.example.binpacking.service.Algorithm
 import com.example.binpacking.service.PackingService
+import com.example.binpacking.setToDecimal
+import com.example.binpacking.entity.DEFAULT_NUMBER_OF_DECIMALS
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -11,15 +13,19 @@ import kotlin.random.Random
 
 class TestService {
     val workGroupList: List<WorkGroupInfo> = createWorkGroupList()
+    val algorithmType: Algorithm = Algorithm.FFD
 
     fun runningTest() {
         val toteList: MutableList<List<Picking>> = mutableListOf()
 
         workGroupList.forEach { workGroup ->
             val packingResult = createPicking(workGroup)
-            outputDataToCsv(filePath = "./src/main/files/one-workgroup_MFK3_output.csv",
+            outputDataToCsv(
+                filePath = "./src/main/files/one-workgroup_FFD_output.csv",
                 workGroupUid = workGroup.workGroupUid,
-                packingTotes = packingResult.singleItemPackingTote)
+                packingTotes = packingResult.singleItemPackingTote
+            )
+            performance(workGroup.workGroupUid, packingResult.singleItemPackingTote)
         }
     }
 
@@ -29,7 +35,7 @@ class TestService {
 
         val orderList = mutableMapOf<String, MutableList<SkuInfo>>()
 
-        reader.lines().forEach {row ->
+        reader.lines().forEach { row ->
             val data = row.split(",")
             val workGroupUid = data[0]
             val cbmw = CbmwInfo(
@@ -75,17 +81,19 @@ class TestService {
         }
 
         FileWriter(filePath, true).use { writer ->
-            inputRows.forEach { row -> writer.append(
-                "${row.workGroupId},${row.skuId},${row.quantity},${row.locationCode}" +
-                        ",${row.width},${row.height},${row.depth},${row.weight}\n"
-            ) }
+            inputRows.forEach { row ->
+                writer.append(
+                    "${row.workGroupId},${row.skuId},${row.quantity},${row.locationCode}" +
+                            ",${row.width},${row.height},${row.depth},${row.weight}\n"
+                )
+            }
         }
     }
 
     private fun outputDataToCsv(filePath: String, workGroupUid: String, packingTotes: PackingService.PackingTote) {
         var outputRows: MutableList<OutputRow> = mutableListOf()
 
-        packingTotes.totes.forEach{ tote ->
+        packingTotes.totes.forEach { tote ->
             tote.items.forEach { item ->
 
                 val row = OutputRow(
@@ -105,12 +113,14 @@ class TestService {
             }
         }
 
-        FileWriter(filePath, true).use { writer ->
-            outputRows.forEach { row -> writer.append(
-                "${row.workGroupId},${row.toteId},${row.skuId}," +
-                        "${row.width},${row.depth},${row.height}," +
-                        "${row.positionX},${row.positionY},${row.positionZ}\n"
-            ) }
+        FileWriter(filePath, false).use { writer ->
+            outputRows.forEach { row ->
+                writer.append(
+                    "${row.workGroupId},${row.toteId},${row.skuId}," +
+                            "${row.width},${row.depth},${row.height}," +
+                            "${row.positionX},${row.positionY},${row.positionZ}\n"
+                )
+            }
         }
     }
 
@@ -214,7 +224,7 @@ class TestService {
 
         }
 
-        packer.packForTest(algorithm = Algorithm.MFK)
+        packer.packForTest(algorithm = algorithmType)
 
         return packer
     }
@@ -222,11 +232,34 @@ class TestService {
     private fun createPickingFloor(packing: PackingService) {
         packing.packingTote.totes.forEach { tote ->
             println("===================== [" + tote.name + "] =====================")
-            println("total "+tote.items.size+" items")
+            println("total " + tote.items.size + " items")
             tote.items.forEach { item ->
-                println(item.skuId + " / " + item.position+ " + " + listOf(item.width, item.depth, item.height))
+                println(item.skuId + " / " + item.position + " + " + listOf(item.width, item.depth, item.height))
             }
-            println()
+            println(algorithmType)
         }
+    }
+
+    private fun performance(workGroupUid: String, packingTotes: PackingService.PackingTote) {
+
+        println("<< $algorithmType >>")
+        println("Total number of totes for $workGroupUid: ${packingTotes.totes.size}\n")
+        var loadFactorSum: Double = 0.0
+        var itemNumSum = 0
+        packingTotes.totes.forEach { tote ->
+            println("===================== [" + tote.name + "] =====================")
+            val loadFactor = setToDecimal(
+                (1 - (tote.availSpace / (tote.width * tote.depth * tote.height))) * 100,
+                DEFAULT_NUMBER_OF_DECIMALS
+            )
+            println("Load factor: $loadFactor %")
+            println("Number of packed items: ${tote.items.size}\n")
+            loadFactorSum += loadFactor
+            itemNumSum += tote.items.size
+        }
+        loadFactorSum /= packingTotes.totes.size
+        itemNumSum /= packingTotes.totes.size
+        println("Average load factor: $loadFactorSum %")
+        println("Average number of packed items: ${itemNumSum}\n")
     }
 }

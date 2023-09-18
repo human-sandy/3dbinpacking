@@ -19,6 +19,7 @@ class AlgorithmService {
                 if (tote.putItem(item)) {
                     tote.items.add(item)
                     packed = true
+                    tote.availSpace -= item.getVolume()
                     break
                 } else tote.unfittedItems.add(item)
             }
@@ -27,6 +28,7 @@ class AlgorithmService {
                 with(singleItemPackingTote) {
                     this.addTote()
                     this.totes.last().putItem(item)
+                    this.totes.last().availSpace -= item.getVolume()
                     this.totes.last().items.add(item)
                 }
             }
@@ -57,6 +59,7 @@ class AlgorithmService {
                 with(singleItemPackingTote) {
                     this.addTote()
                     this.totes.last().putItem(item)
+                    this.totes.last().availSpace -= item.getVolume()
                     this.totes.last().items.add(item)
                 }
             }
@@ -75,6 +78,7 @@ class AlgorithmService {
                 for (i in 0 until k) {
                     if (this.putItem(packingItem.items.first())) {
                         val item = packingItem.items.removeFirst()
+                        this.availSpace -= item.getVolume()
                         tote.items.add(item)
                     } else break
                 }
@@ -83,6 +87,7 @@ class AlgorithmService {
 
                 while (this.putItem(packingItem.items.last())) {
                     val item = packingItem.items.removeLast()
+                    this.availSpace -= item.getVolume()
                     tote.items.add(item)
 
                     if(packingItem.items.isNotEmpty())

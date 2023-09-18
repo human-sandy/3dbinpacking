@@ -1,6 +1,6 @@
 package com.example.binpacking.entity
 
-const val DEFAULT_NUMBER_OF_DECIMALS: Int = 0
+const val DEFAULT_NUMBER_OF_DECIMALS: Int = 2
 
 object RotationType{
     const val LONGER_D = 0
