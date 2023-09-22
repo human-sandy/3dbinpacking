@@ -1,7 +1,6 @@
 package com.example.binpacking.service
 
 import com.example.binpacking.entity.Item
-
 enum class Algorithm {
     FFD, BFD, MFK
 }

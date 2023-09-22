@@ -13,19 +13,25 @@ import kotlin.random.Random
 
 class TestService {
     val workGroupList: List<WorkGroupInfo> = createWorkGroupList()
-    val algorithmType: Algorithm = Algorithm.FFD
+    val algorithm = listOf(Algorithm.FFD)
+    // val algorithm:List<Algorithm> = listOf(Algorithm.BFD) or listOf(Algorithm.MFK) or enumValues<Algorithm>().toList()
+    // 3개의 알고리즘을 동시에 돌리는 것은 테스트를 위한 csv 파일을 한 번에 뽑기 위함입니다.
+    // 서버에 전달해줄 때에는 for문 때문에 toteList가 업데이트 되어서 마지막 알고리즘 값만 전달될 거에요.
+    // 로봇에게 sku별 quantity를 제공해줄 때에는 하나의 알고리즘만 들어있는 리스트를 생성하고 packForTest() 대신 pack()을 실행하면 됩니다.
 
     fun runningTest() {
         val toteList: MutableList<List<Picking>> = mutableListOf()
 
-        workGroupList.forEach { workGroup ->
-            val packingResult = createPicking(workGroup)
-            outputDataToCsv(
-                filePath = "./src/main/files/one-workgroup_FFD_output.csv",
-                workGroupUid = workGroup.workGroupUid,
-                packingTotes = packingResult.singleItemPackingTote
-            )
-            performance(workGroup.workGroupUid, packingResult.singleItemPackingTote)
+        algorithm.forEach { algorithmType ->
+            workGroupList.forEach { workGroup ->
+                val packingResult = createPicking(workGroup, algorithmType)
+                outputDataToCsv(
+                    filePath = "./src/main/files/${algorithmType}_output.csv",
+                    workGroupUid = workGroup.workGroupUid,
+                    packingTotes = packingResult.singleItemPackingTote
+                )
+                performance(workGroup.workGroupUid, packingResult.singleItemPackingTote, algorithmType)
+            }
         }
     }
 
@@ -203,7 +209,7 @@ class TestService {
         return workGroupList
     }
 
-    private fun createPicking(workGroup: WorkGroupInfo): PackingService {
+    private fun createPicking(workGroup: WorkGroupInfo, algorithmType: Algorithm): PackingService {
         val packer = PackingService()
 
         workGroup.skus.map { sku ->
@@ -236,11 +242,10 @@ class TestService {
             tote.items.forEach { item ->
                 println(item.skuId + " / " + item.position + " + " + listOf(item.width, item.depth, item.height))
             }
-            println(algorithmType)
         }
     }
 
-    private fun performance(workGroupUid: String, packingTotes: PackingService.PackingTote) {
+    private fun performance(workGroupUid: String, packingTotes: PackingService.PackingTote, algorithmType: Algorithm) {
 
         println("<< $algorithmType >>")
         println("Total number of totes for $workGroupUid: ${packingTotes.totes.size}\n")
