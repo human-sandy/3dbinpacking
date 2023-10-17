@@ -9,30 +9,58 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
+import kotlin.time.measureTimedValue
 
 class TestService {
     val workGroupList: List<WorkGroupInfo> = createWorkGroupList()
-    val algorithm = listOf(Algorithm.FFD)
+    val algorithm = listOf(Algorithm.FFD, Algorithm.BFD, Algorithm.MFK)
     // val algorithm:List<Algorithm> = listOf(Algorithm.BFD) or listOf(Algorithm.MFK) or enumValues<Algorithm>().toList()
     // 3개의 알고리즘을 동시에 돌리는 것은 테스트를 위한 csv 파일을 한 번에 뽑기 위함입니다.
     // 서버에 전달해줄 때에는 for문 때문에 toteList가 업데이트 되어서 마지막 알고리즘 값만 전달될 거에요.
     // 로봇에게 sku별 quantity를 제공해줄 때에는 하나의 알고리즘만 들어있는 리스트를 생성하고 packForTest() 대신 pack()을 실행하면 됩니다.
 
+    @OptIn(kotlin.time.ExperimentalTime::class)
     fun runningTest() {
         val toteList: MutableList<List<Picking>> = mutableListOf()
+        var packingResult: PackingService
+        val performanceList: MutableList<PerformanceOutput> = mutableListOf()
 
         algorithm.forEach { algorithmType ->
             workGroupList.forEach { workGroup ->
-                val packingResult = createPicking(workGroup, algorithmType)
+                val measuredTime = measureTimedValue {
+                    packingResult = createPicking(workGroup, algorithmType)
+                }
                 outputDataToCsv(
                     filePath = "./src/main/files/${algorithmType}_output.csv",
                     workGroupUid = workGroup.workGroupUid,
                     packingTotes = packingResult.singleItemPackingTote
                 )
                 performance(workGroup.workGroupUid, packingResult.singleItemPackingTote, algorithmType)
+
+                val toteCount = packingResult.packingTote.totes.size
+
+                var skuCount : Int = 0
+                packingResult.packingTote.totes.forEach { tote ->
+                    skuCount += tote.items.size
+                }
+
+                performanceList.add(
+                    PerformanceOutput(
+                        algorithm = algorithmType.toString(),
+                        workGroup = workGroup.workGroupUid,
+                        totalToteCount = toteCount,
+                        totalSkuCount = skuCount,
+                        duration = TimeUnit.NANOSECONDS.toMillis(measuredTime.duration.inWholeNanoseconds)
+                ))
             }
         }
+
+        measurePerformance(
+            filePath = "./src/main/files/checkPerformance.csv",
+            result = performanceList
+        )
     }
 
     private fun inputFromCsvData(fileUrl: String): MutableMap<String, MutableList<SkuInfo>> {
@@ -43,7 +71,7 @@ class TestService {
 
         reader.lines().forEach { row ->
             val data = row.split(",")
-            val workGroupUid = data[0]
+            val workGroupUid = data[0].replace("\uFEFF", "")
             val cbmw = CbmwInfo(
                 width = data[4].toDouble(),
                 height = data[5].toDouble(),
@@ -130,6 +158,17 @@ class TestService {
         }
     }
 
+    private fun measurePerformance(filePath: String, result: MutableList<PerformanceOutput>) {
+        FileWriter(filePath, true).use { writer ->
+            result.forEach { output ->
+                writer.append(
+                    "${output.algorithm},${output.workGroup},${output.totalToteCount}," +
+                            "${output.totalSkuCount},${output.duration}\n"
+                )
+            }
+        }
+    }
+
     private fun testData(): List<SkuInfo> {
         val apple1 = SkuInfo(
             skuUid = "apple", quantity = 0, locationCode = "a-01-01",
@@ -188,14 +227,14 @@ class TestService {
     private fun createWorkGroupList(): List<WorkGroupInfo> {
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
 
-        val orderList = inputFromCsvData(fileUrl = "./src/main/files/sample_one-workgroup.csv")
+        val orderList= inputFromCsvData(fileUrl = "./src/main/files/binpacking_test.csv")
 
         orderList.map { workGroup ->
-            val WorkGroupInfo = WorkGroupInfo(
-                workGroupUid = workGroup.key,
+            val workGroupInfo = WorkGroupInfo(
+                workGroupUid = workGroup.key.toString(),
                 skus = workGroup.value
             )
-            workGroupList.add(WorkGroupInfo)
+            workGroupList.add(workGroupInfo)
         }
 
         /*val skuList = testbedData()
@@ -267,4 +306,12 @@ class TestService {
         println("Average load factor: $loadFactorSum %")
         println("Average number of packed items: ${itemNumSum}\n")
     }
+
+//    inline fun <T> measureTimeValue(block: () -> T): TimedValue<T> {
+//        contract {
+//            callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+//        }
+//
+//        return TimeSource.Monotonic.measureTimedValue(block)
+//    }
 }
