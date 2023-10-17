@@ -17,7 +17,7 @@ class TestService {
     val inputFilePath = "./src/main/files/binpacking_test.csv"
     val inputFileName = inputFilePath.split("/").last()
     val workGroupList: List<WorkGroupInfo> = createWorkGroupList(inputFilePath)
-    val algorithm = listOf(Algorithm.MFK)
+    val algorithm = listOf(Algorithm.FFD, Algorithm.BFD, Algorithm.MFK)
     // val algorithm:List<Algorithm> = listOf(Algorithm.BFD) or listOf(Algorithm.MFK) or enumValues<Algorithm>().toList()
     // 3개의 알고리즘을 동시에 돌리는 것은 테스트를 위한 csv 파일을 한 번에 뽑기 위함입니다.
     // 서버에 전달해줄 때에는 for문 때문에 toteList가 업데이트 되어서 마지막 알고리즘 값만 전달될 거에요.
@@ -28,6 +28,7 @@ class TestService {
         val toteList: MutableList<List<Picking>> = mutableListOf()
         var packingResult: PackingService
         val performanceList: MutableList<PerformanceOutput> = mutableListOf()
+        val loadFactorList: MutableList<List<Any>> = mutableListOf()
 
         algorithm.forEach { algorithmType ->
             workGroupList.forEach { workGroup ->
@@ -39,10 +40,10 @@ class TestService {
                     workGroupUid = workGroup.workGroupUid,
                     packingTotes = packingResult.singleItemPackingTote
                 )
-                performance(workGroup.workGroupUid, packingResult.singleItemPackingTote, algorithmType)
+
+                loadFactorList.add(getLoadFactor(workGroup.workGroupUid, packingResult.singleItemPackingTote, algorithmType))
 
                 val toteCount = packingResult.packingTote.totes.size
-
                 var skuCount : Int = 0
                 packingResult.packingTote.totes.forEach { tote ->
                     skuCount += tote.items.size
@@ -62,6 +63,11 @@ class TestService {
         measurePerformance(
             filePath = "./src/main/files/checkPerformance.csv",
             result = performanceList
+        )
+
+        measureLoadFactor(
+            filePath = "./src/main/files/checkLoadFactor.csv",
+            result = loadFactorList
         )
     }
 
@@ -155,17 +161,6 @@ class TestService {
                     "${row.workGroupId},${row.toteId},${row.skuId}," +
                             "${row.width},${row.depth},${row.height}," +
                             "${row.positionX},${row.positionY},${row.positionZ}\n"
-                )
-            }
-        }
-    }
-
-    private fun measurePerformance(filePath: String, result: MutableList<PerformanceOutput>) {
-        FileWriter(filePath, true).use { writer ->
-            result.forEach { output ->
-                writer.append(
-                    "${output.algorithm},${output.workGroup},${output.totalToteCount}," +
-                            "${output.totalSkuCount},${output.duration}\n"
                 )
             }
         }
@@ -286,27 +281,49 @@ class TestService {
         }
     }
 
-    private fun performance(workGroupUid: String, packingTotes: PackingService.PackingTote, algorithmType: Algorithm) {
-
-        println("<< $algorithmType >>")
-        println("Total number of totes for $workGroupUid: ${packingTotes.totes.size}\n")
+    private fun getLoadFactor(workGroupUid: String, packingTotes: PackingService.PackingTote, algorithmType: Algorithm): List<Any> {
+        //println("<< $algorithmType >>")
+        //println("Total number of totes for $workGroupUid: ${packingTotes.totes.size}\n")
         var loadFactorSum: Double = 0.0
         var itemNumSum = 0
+
         packingTotes.totes.forEach { tote ->
-            println("===================== [" + tote.name + "] =====================")
+            //println("===================== [" + tote.name + "] =====================")
             val loadFactor = setToDecimal(
                 (1 - (tote.availSpace / (tote.width * tote.depth * tote.height))) * 100,
                 DEFAULT_NUMBER_OF_DECIMALS
             )
-            println("Load factor: $loadFactor %")
-            println("Number of packed items: ${tote.items.size}\n")
+            //println("Load factor: $loadFactor %")
+            //println("Number of packed items: ${tote.items.size}\n")
             loadFactorSum += loadFactor
             itemNumSum += tote.items.size
         }
+
         loadFactorSum /= packingTotes.totes.size
         itemNumSum /= packingTotes.totes.size
-        println("Average load factor: $loadFactorSum %")
-        println("Average number of packed items: ${itemNumSum}\n")
+        //println("Average load factor: $loadFactorSum %")
+        //println("Average number of packed items: ${itemNumSum}\n")
+
+        return listOf(algorithmType, workGroupUid, String.format("%.2f",loadFactorSum), itemNumSum)
+    }
+
+    private fun measureLoadFactor(filePath:String, result: MutableList<List<Any>>){
+        FileWriter(filePath, true).use { writer ->
+            result.forEach { output ->
+                writer.append("${output[0]},${output[1]},${output[2]},${output[3]}\n")
+            }
+        }
+    }
+
+    private fun measurePerformance(filePath: String, result: MutableList<PerformanceOutput>) {
+        FileWriter(filePath, true).use { writer ->
+            result.forEach { output ->
+                writer.append(
+                    "${output.algorithm},${output.workGroup},${output.totalToteCount}," +
+                            "${output.totalSkuCount},${output.duration}\n"
+                )
+            }
+        }
     }
 
 //    inline fun <T> measureTimeValue(block: () -> T): TimedValue<T> {
