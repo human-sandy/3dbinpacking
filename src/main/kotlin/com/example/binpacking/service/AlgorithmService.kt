@@ -67,7 +67,11 @@ class AlgorithmService {
 
     }
 
-    fun packingWithMFK(singleItemPackingTote: PackingService.PackingTote, packingItem: PackingService.PackingItem, k: Int) {
+    fun packingWithMFK(
+        singleItemPackingTote: PackingService.PackingTote,
+        packingItem: PackingService.PackingItem,
+        k: Int
+    ) {
 
         while (packingItem.items.size != 0) {
             singleItemPackingTote.addTote()
@@ -75,23 +79,20 @@ class AlgorithmService {
 
             with(tote) {
                 for (i in 0 until k) {
-                    if (this.putItem(packingItem.items.first())) {
-                        val item = packingItem.items.removeFirst()
+                    if (packingItem.items.isNotEmpty()) {
+                        if (this.putItem(packingItem.items.first())) {
+                            val item = packingItem.items.removeFirst()
+                            this.availSpace -= item.getVolume()
+                            tote.items.add(item)
+                        } else break
+                    } else break }
+
+                while (packingItem.items.isNotEmpty()) {
+                    if(this.putItem(packingItem.items.last())) {
+                        val item = packingItem.items.removeLast()
                         this.availSpace -= item.getVolume()
                         tote.items.add(item)
                     } else break
-                }
-                if(packingItem.items.isEmpty())
-                    return
-
-                while (this.putItem(packingItem.items.last())) {
-                    val item = packingItem.items.removeLast()
-                    this.availSpace -= item.getVolume()
-                    tote.items.add(item)
-
-                    if(packingItem.items.isNotEmpty())
-                        continue
-                    else break
                 }
             }
         }

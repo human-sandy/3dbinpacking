@@ -14,8 +14,10 @@ import kotlin.random.Random
 import kotlin.time.measureTimedValue
 
 class TestService {
-    val workGroupList: List<WorkGroupInfo> = createWorkGroupList()
-    val algorithm = listOf(Algorithm.FFD, Algorithm.BFD, Algorithm.MFK)
+    val inputFilePath = "./src/main/files/binpacking_test.csv"
+    val inputFileName = inputFilePath.split("/").last()
+    val workGroupList: List<WorkGroupInfo> = createWorkGroupList(inputFilePath)
+    val algorithm = listOf(Algorithm.MFK)
     // val algorithm:List<Algorithm> = listOf(Algorithm.BFD) or listOf(Algorithm.MFK) or enumValues<Algorithm>().toList()
     // 3개의 알고리즘을 동시에 돌리는 것은 테스트를 위한 csv 파일을 한 번에 뽑기 위함입니다.
     // 서버에 전달해줄 때에는 for문 때문에 toteList가 업데이트 되어서 마지막 알고리즘 값만 전달될 거에요.
@@ -33,7 +35,7 @@ class TestService {
                     packingResult = createPicking(workGroup, algorithmType)
                 }
                 outputDataToCsv(
-                    filePath = "./src/main/files/${algorithmType}_output.csv",
+                    filePath = "./src/main/files/${inputFileName}_${algorithmType}_output.csv",
                     workGroupUid = workGroup.workGroupUid,
                     packingTotes = packingResult.singleItemPackingTote
                 )
@@ -147,7 +149,7 @@ class TestService {
             }
         }
 
-        FileWriter(filePath, false).use { writer ->
+        FileWriter(filePath, true).use { writer ->
             outputRows.forEach { row ->
                 writer.append(
                     "${row.workGroupId},${row.toteId},${row.skuId}," +
@@ -224,10 +226,10 @@ class TestService {
         return WorkGroupInfo(workGroupUid, skus)
     }
 
-    private fun createWorkGroupList(): List<WorkGroupInfo> {
+    private fun createWorkGroupList(filePath: String): List<WorkGroupInfo> {
         val workGroupList: MutableList<WorkGroupInfo> = mutableListOf()
 
-        val orderList= inputFromCsvData(fileUrl = "./src/main/files/binpacking_test.csv")
+        val orderList= inputFromCsvData(fileUrl = filePath)
 
         orderList.map { workGroup ->
             val workGroupInfo = WorkGroupInfo(
