@@ -284,8 +284,8 @@ class TestService {
     private fun getLoadFactor(workGroupUid: String, packingTotes: PackingService.PackingTote, algorithmType: Algorithm): List<Any> {
         //println("<< $algorithmType >>")
         //println("Total number of totes for $workGroupUid: ${packingTotes.totes.size}\n")
-        var loadFactorSum: Double = 0.0
-        var itemNumSum = 0
+        val loadFactoList: MutableList<Double> = mutableListOf<Double>()
+        val itemNumList: MutableList<Int> = mutableListOf<Int>()
 
         packingTotes.totes.forEach { tote ->
             //println("===================== [" + tote.name + "] =====================")
@@ -295,22 +295,20 @@ class TestService {
             )
             //println("Load factor: $loadFactor %")
             //println("Number of packed items: ${tote.items.size}\n")
-            loadFactorSum += loadFactor
-            itemNumSum += tote.items.size
+            loadFactoList.add(loadFactor)
+            itemNumList.add(tote.items.size)
         }
-
-        loadFactorSum /= packingTotes.totes.size
-        itemNumSum /= packingTotes.totes.size
         //println("Average load factor: $loadFactorSum %")
-        //println("Average number of packed items: ${itemNumSum}\n")
+        //println("Average number of packed items: ${itemNumSum}\n"
 
-        return listOf(algorithmType, workGroupUid, String.format("%.2f",loadFactorSum), itemNumSum)
+        return listOf(algorithmType, workGroupUid, String.format("%.2f",loadFactoList.average()), String.format("%.2f",loadFactoList.max()),
+                                                                                String.format("%.2f",itemNumList.average()), itemNumList.max())
     }
 
     private fun measureLoadFactor(filePath:String, result: MutableList<List<Any>>){
         FileWriter(filePath, true).use { writer ->
             result.forEach { output ->
-                writer.append("${output[0]},${output[1]},${output[2]},${output[3]}\n")
+                writer.append("${output[0]},${output[1]},${output[2]},${output[3]}, ${output[4]},${output[5]}\n")
             }
         }
     }
