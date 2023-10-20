@@ -18,7 +18,7 @@ class Item(
     var depth: Double = 0.0
     var height: Double = 0.0
 
-    fun getDimension(): List<Double> {
+    fun setDimension() {
         var dim = listOf(length1, length2, length3)
         dim = dim.sortedWith(Comparator<Double>{ a, b ->
             when {
@@ -30,9 +30,11 @@ class Item(
         this.depth = dim[0]
         this.width = dim[1]
         this.height = dim[2]
-
-        return listOf(this.width, this.depth, this.height)
     } // width, depth, height 확정
+
+    fun getDimension(): List<Double> {
+        return listOf(this.width, this.depth, this.height)
+    }
 
     fun formatNumbers(numberOfDecimals: Int) {
         width = setToDecimal(width, numberOfDecimals)
@@ -42,7 +44,7 @@ class Item(
         this.numberOfDecimals = numberOfDecimals
     } // 아이템 정보 가공
 
-    fun widthDepthSwitch(): List<Double> {
+    fun widthDepthSwitch() {
         var temp = this.width
         this.width = this.depth
         this.depth = temp
@@ -53,7 +55,6 @@ class Item(
         else if(rotationType == 1){
             rotationType = 0
         }
-        return listOf(width, depth, height)
     }
 
     fun getVolume(): Double {
