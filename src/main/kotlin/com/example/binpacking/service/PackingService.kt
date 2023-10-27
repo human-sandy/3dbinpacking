@@ -41,7 +41,7 @@ class PackingService {
                 // item 개별 확인용
                 totalItems += 1
                 val individualItem = item.copy()
-                individualItem.getDimension()
+                individualItem.setDimension()
                 items.add(individualItem)
             }
         }
@@ -98,7 +98,7 @@ class PackingService {
                     algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
                     }
                 Algorithm.MFK -> {
-                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 3)
+                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 1)
                 }
             }
     }

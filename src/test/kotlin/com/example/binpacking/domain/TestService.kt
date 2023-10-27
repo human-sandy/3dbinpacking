@@ -55,7 +55,8 @@ class TestService {
                         workGroup = workGroup.workGroupUid,
                         totalToteCount = toteCount,
                         totalSkuCount = skuCount,
-                        duration = TimeUnit.NANOSECONDS.toMillis(measuredTime.duration.inWholeNanoseconds)
+                        duration = TimeUnit.NANOSECONDS.toMicros(measuredTime.duration.inWholeNanoseconds)
+                        //TimeUnit.NANOSECONDS.toMillis(measuredTime.duration.inWholeNanoseconds)
                 ))
             }
         }
@@ -65,10 +66,10 @@ class TestService {
             result = performanceList
         )
 
-        measureLoadFactor(
+       measureLoadFactor(
             filePath = "./src/main/files/checkLoadFactor.csv",
             result = loadFactorList
-        )
+       )
     }
 
     private fun inputFromCsvData(fileUrl: String): MutableMap<String, MutableList<SkuInfo>> {
@@ -261,7 +262,7 @@ class TestService {
                 quantity = sku.quantity,
                 workId = ""
             )
-            item.getDimension()
+            item.setDimension()
             packer.packingItem.addItem(item)
 
         }
