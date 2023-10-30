@@ -2,9 +2,8 @@ package com.example.binpacking.entity
 
 const val DEFAULT_NUMBER_OF_DECIMALS: Int = 2
 
-object RotationType{
-    const val LONGER_D = 0
-    const val LONGER_W = 1
+enum class RotationType{
+    LONGER_DEPTH, LONGER_WIDTH
 }
 
 class ToteSpec(

@@ -17,7 +17,7 @@ class TestService {
     val inputFilePath = "./src/main/files/binpacking_test.csv"
     val inputFileName = inputFilePath.split("/").last()
     val workGroupList: List<WorkGroupInfo> = createWorkGroupList(inputFilePath)
-    val algorithm = listOf(Algorithm.FFD, Algorithm.BFD, Algorithm.MFK)
+    val algorithm = listOf(Algorithm.FFD)
     // val algorithm:List<Algorithm> = listOf(Algorithm.BFD) or listOf(Algorithm.MFK) or enumValues<Algorithm>().toList()
     // 3개의 알고리즘을 동시에 돌리는 것은 테스트를 위한 csv 파일을 한 번에 뽑기 위함입니다.
     // 서버에 전달해줄 때에는 for문 때문에 toteList가 업데이트 되어서 마지막 알고리즘 값만 전달될 거에요.
@@ -134,7 +134,7 @@ class TestService {
     }
 
     private fun outputDataToCsv(filePath: String, workGroupUid: String, packingTotes: PackingService.PackingTote) {
-        var outputRows: MutableList<OutputRow> = mutableListOf()
+        val outputRows: MutableList<OutputRow> = mutableListOf()
 
         packingTotes.totes.forEach { tote ->
             tote.items.forEach { item ->
@@ -143,13 +143,13 @@ class TestService {
                     workGroupId = workGroupUid,
                     toteId = tote.name,
                     skuId = item.skuId,
-                    width = item.width.toString(),
-                    height = item.height.toString(),
-                    depth = item.depth.toString(),
+                    width = item.cbm.width.toString(),
+                    height = item.cbm.height.toString(),
+                    depth = item.cbm.depth.toString(),
                     weight = item.weight.toString(),
-                    positionX = item.position[0].toString(),
-                    positionY = item.position[1].toString(),
-                    positionZ = item.position[2].toString()
+                    positionX = item.position.x.toString(),
+                    positionY = item.position.y.toString(),
+                    positionZ = item.position.z.toString()
                 )
 
                 outputRows.add(row)
@@ -255,9 +255,7 @@ class TestService {
                 skuId = sku.skuUid,
                 location = sku.locationCode,
                 name = name,
-                length1 = sku.cbmw.width,
-                length2 = sku.cbmw.height,
-                length3 = sku.cbmw.depth,
+                Item.Length(sku.cbmw.width, sku.cbmw.height, sku.cbmw.depth),
                 weight = sku.cbmw.weight,
                 quantity = sku.quantity,
                 workId = ""
@@ -277,7 +275,7 @@ class TestService {
             println("===================== [" + tote.name + "] =====================")
             println("total " + tote.items.size + " items")
             tote.items.forEach { item ->
-                println(item.skuId + " / " + item.position + " + " + listOf(item.width, item.depth, item.height))
+                println(item.skuId + " / " + item.position + " + " + listOf(item.cbm.width, item.cbm.depth, item.cbm.height))
             }
         }
     }

@@ -1,79 +1,96 @@
 package com.example.binpacking.entity
 
 import com.example.binpacking.setToDecimal
-class Item(
+
+data class Item(
     //아이템 정보 매개 변수
     val skuId: String,
     val location: String,
     val name: String,
-    var length1: Double, var length2: Double, var length3: Double, var weight: Double,
+    private val length: Length = Length(-1.0, -1.0, -1.0),
+    var weight: Double,
     var quantity: Int,
     val workId: String
 ) {
     //아이템 프로퍼티
-    var rotationType: Int = 0 // default: depth is longer than width
-    var position: MutableList<Double> = mutableListOf(-1.0, -1.0, -1.0)
-    private var numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
-    var width: Double = 0.0
-    var depth: Double = 0.0
-    var height: Double = 0.0
+    private var rotationType: RotationType = RotationType.LONGER_DEPTH // default: depth is longer than width
+    var position: Pivot = Pivot(-1.0, -1.0, -1.0)
+    var cbm: Cbm = Cbm(-1.0, -1.0, -1.0)
+    private val numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
+
+    data class Length(
+        val length1: Double,
+        val length2: Double,
+        val length3: Double,
+    )
+
+    data class Cbm(
+        val width: Double,
+        val depth: Double,
+        val height: Double,
+    )
+
+    data class Pivot(
+        val x: Double,
+        val y: Double,
+        val z: Double
+    )
 
     fun setDimension() {
-        var dim = listOf(length1, length2, length3)
-        dim = dim.sortedWith(Comparator<Double>{ a, b ->
+        var dimension = listOf(length.length1, length.length2, length.length3)
+        dimension = dimension.sortedWith(Comparator<Double>{ a, b ->
             when {
                 a > b -> -1
                 a < b -> 1
                 else -> 0
             }
         })
-        this.depth = dim[0]
-        this.width = dim[1]
-        this.height = dim[2]
+        this.cbm = Cbm(dimension[1], dimension[0], dimension[2])
     } // width, depth, height 확정
 
-    fun getDimension(): List<Double> {
-        return listOf(this.width, this.depth, this.height)
+    fun getDimension(): Cbm {
+        return Cbm(this.cbm.width, this.cbm.depth, this.cbm.height)
     }
 
     fun formatNumbers(numberOfDecimals: Int) {
-        width = setToDecimal(width, numberOfDecimals)
-        height = setToDecimal(height, numberOfDecimals)
-        depth = setToDecimal(depth, numberOfDecimals)
-        weight = setToDecimal(weight, numberOfDecimals)
-        this.numberOfDecimals = numberOfDecimals
+        val width = setToDecimal(this.cbm.width, numberOfDecimals)
+        val height = setToDecimal(this.cbm.height, numberOfDecimals)
+        val depth = setToDecimal(this.cbm.depth, numberOfDecimals)
+        this.weight = setToDecimal(this.weight, numberOfDecimals)
+
+        this.cbm = Cbm(width, depth, height)
     } // 아이템 정보 가공
 
     fun widthDepthSwitch() {
-        var temp = this.width
-        this.width = this.depth
-        this.depth = temp
+        this.cbm = Cbm(this.cbm.depth, this.cbm.width, this.cbm.height)
 
-        if (rotationType == 0){
-            rotationType = 1
+        if (rotationType == RotationType.LONGER_DEPTH){
+            rotationType = RotationType.LONGER_WIDTH
         }
-        else if(rotationType == 1){
-            rotationType = 0
+        else if(rotationType == RotationType.LONGER_WIDTH){
+            rotationType = RotationType.LONGER_DEPTH
         }
     }
 
     fun getVolume(): Double {
-        val volume = width * height * depth
+        val volume = this.cbm.width * this.cbm.height * this.cbm.depth
         return setToDecimal(volume, this.numberOfDecimals)
     } // 부피 반환
 
     fun getArea(): Double{
-        val area = width * depth
+        val area = this.cbm.width * this.cbm.depth
         return setToDecimal(area, this.numberOfDecimals)
     } //밑면 면적 반환
 
+    /*
     fun copy(): Item {
-        return Item(skuId, location, name, width, height, depth, weight, quantity, workId)
+        return Item(skuId, location, name, Length(this.cbm.width, this.cbm.height, this.cbm.depth), weight, quantity, workId)
     }
+    */
 
     override fun toString(): String {
         return "Item(skuId='$skuId', location='$location', name='$name'," +
-                " width=$width, height=$height, depth=$depth, weight=$weight," +
+                " width=${this.cbm.width}, height=${this.cbm.height}, depth=${this.cbm.depth}, weight=${weight}," +
                 " quantity=$quantity, rotationType=$rotationType, position=$position," +
                 " numberOfDecimals=$numberOfDecimals)"
     }

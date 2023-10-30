@@ -1,6 +1,5 @@
 package com.example.binpacking.service
 
-import com.example.binpacking.entity.DEFAULT_NUMBER_OF_DECIMALS
 import com.example.binpacking.entity.Item
 import com.example.binpacking.entity.Tote
 import com.example.binpacking.entity.ToteSpec
@@ -11,13 +10,11 @@ class PackingService {
     val singleItemPackingTote = PackingTote()
 
     class PackingTote {
-        var totes: MutableList<Tote> = mutableListOf()
-        private var totalTotes: Int = 0
-
+        val totes: MutableList<Tote> = mutableListOf()
         private val toteSpec = ToteSpec(0.0)
 
         fun addTote() {
-            val name = "tote_$totalTotes"
+            val name = "tote_${totes.size}"
             val newTote = Tote(
                 name,
                 toteSpec.width,
@@ -25,21 +22,16 @@ class PackingService {
                 toteSpec.depth,
                 toteSpec.weight
             )
-            totalTotes += 1
-
             totes.add(newTote)
         }
     }
 
     class PackingItem {
-        var items: MutableList<Item> = mutableListOf()
-        val unfitItems: List<Item> = listOf()
-        private var totalItems: Int = 0
+        val items: MutableList<Item> = mutableListOf()
 
         fun addItem(item: Item) {
             for (index in 0 until item.quantity) {
                 // item 개별 확인용
-                totalItems += 1
                 val individualItem = item.copy()
                 individualItem.setDimension()
                 items.add(individualItem)
@@ -47,92 +39,91 @@ class PackingService {
         }
     }
 
-    private fun countDuplicates(targetList: MutableList<String>): Map<String, Int> {
-        val occurrenceMap = mutableMapOf<String, Int>()
+    private fun countDuplicates(singleItemSkuIdlist: MutableList<String>): Map<String, Int> {
+        val countMap = mutableMapOf<String, Int>()
 
-        targetList.forEach { name ->
-            occurrenceMap[name] = occurrenceMap.getOrDefault(name, 0) + 1
+        singleItemSkuIdlist.forEach { skuId ->
+            countMap[skuId] = countMap.getOrDefault(skuId, 0) + 1
         }
 
-        return occurrenceMap
+        return countMap
     }
 
     fun pack(
         biggerFirst: Boolean = true,
-        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS,
         algorithm: Algorithm
     ) {
         val algorithmService = AlgorithmService()
-        if (biggerFirst)
-            packingItem.items = packingItem.items.sortedByDescending { it.getArea() }.toMutableList()
+        if (biggerFirst) {
+            packingItem.items.sortByDescending { it.getArea() }
+        }
 
-            when (algorithm) {
-                Algorithm.FFD -> {
-                    algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
-                }
-                Algorithm.BFD -> {
-                    algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
-                }
-                Algorithm.MFK -> {
-                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 1)
-                }
+        when (algorithm) {
+            Algorithm.FFD -> {
+                algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
             }
 
+            Algorithm.BFD -> {
+                algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
+            }
+
+            Algorithm.MFK -> {
+                algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 1)
+            }
+        }
         groupItemsInTote()
     }
 
     fun packForTest(
         biggerFirst: Boolean = true,
-        numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS,
         algorithm: Algorithm
     ) {
         val algorithmService = AlgorithmService()
         if (biggerFirst)
-            packingItem.items = packingItem.items.sortedByDescending { it.getArea() }.toMutableList()
+            packingItem.items.sortByDescending { it.getArea() }
 
-            when (algorithm) {
-                Algorithm.FFD -> {
-                    algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
-                }
-                Algorithm.BFD -> {
-                    algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
-                    }
-                Algorithm.MFK -> {
-                    algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 1)
-                }
+        when (algorithm) {
+            Algorithm.FFD -> {
+                algorithmService.packingWithFFD(singleItemPackingTote, packingItem)
             }
+
+            Algorithm.BFD -> {
+                algorithmService.packingWithBFD(singleItemPackingTote, packingItem)
+            }
+
+            Algorithm.MFK -> {
+                algorithmService.packingWithMFK(singleItemPackingTote, packingItem, 1)
+            }
+        }
     }
 
     private fun groupItemsInTote() {
         singleItemPackingTote.totes.map { tote ->
-            val wholeItems = mutableListOf<Item>()
-            val distinctItems = mutableListOf<Item>()
-            val idList = mutableListOf<String>()
-            val skuInfo = mutableMapOf<String, List<String>>()
+            packingTote.addTote()
+            val singleSkuIdList = mutableListOf<String>()
+            val groupedSkuIdList = mutableListOf<String>()
+            val groupedItems = mutableListOf<Item>()
 
             tote.items.map { item ->
-                idList.add(item.skuId)
+                singleSkuIdList.add(item.skuId)
 
-                if (!skuInfo.containsKey(item.skuId)) {
-                    skuInfo[item.skuId] = arrayListOf(item.skuId, item.location)
-                    wholeItems.add(item.copy())
+                if (!groupedSkuIdList.contains(item.skuId)) {
+                    groupedSkuIdList.add(item.skuId)
+                    groupedItems.add(item.copy())
                 }
             }
 
-            val duplicatesCount = countDuplicates(idList)
-            packingTote.addTote()
+            val duplicatesCount = countDuplicates(singleSkuIdList)
 
             duplicatesCount.map { sku ->
                 val quantity = sku.value
-                val existingItem = wholeItems.find { item -> item.skuId == sku.key }
-
-                if (existingItem != null) {
-                    existingItem.quantity = quantity
-                    distinctItems.add(existingItem)
+                val updatedItem: Item? = groupedItems.find { item -> item.skuId == sku.key }
+                updatedItem?.let {
+                    it.quantity = quantity
                 }
             }
 
-            distinctItems.forEach { item ->
+            groupedItems.forEach { item ->
                 packingTote.totes.last().items.add(item)
 
             }

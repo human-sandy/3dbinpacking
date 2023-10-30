@@ -27,8 +27,8 @@ class AlgorithmService {
                 with(singleItemPackingTote) {
                     this.addTote()
                     this.totes.last().putItem(item)
-                    this.totes.last().availSpace -= item.getVolume()
                     this.totes.last().items.add(item)
+                    this.totes.last().availSpace -= item.getVolume()
                 }
             }
         }
@@ -43,7 +43,7 @@ class AlgorithmService {
             }
             var packed = false
 
-            singleItemPackingTote.totes.sortedBy { it.availSpace }
+            singleItemPackingTote.totes.sortBy { it.availSpace }
 
             for (tote in singleItemPackingTote.totes) {
                 if (tote.putItem(item)) {
@@ -58,8 +58,8 @@ class AlgorithmService {
                 with(singleItemPackingTote) {
                     this.addTote()
                     this.totes.last().putItem(item)
-                    this.totes.last().availSpace -= item.getVolume()
                     this.totes.last().items.add(item)
+                    this.totes.last().availSpace -= item.getVolume()
                 }
             }
         }
