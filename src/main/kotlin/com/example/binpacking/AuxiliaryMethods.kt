@@ -1,7 +1,9 @@
 package com.example.binpacking
 
 import com.example.binpacking.entity.Item
-import com.example.binpacking.entity.Item.Pivot as Pivot
+import com.example.binpacking.entity.Item.Pivot
+import kotlin.math.max
+import kotlin.math.min
 
 fun intersect(currentItem: Item, newItem: Item, pivot: Pivot): Boolean {
     val currentItemDimension = currentItem.getDimension()
@@ -13,9 +15,9 @@ fun intersect(currentItem: Item, newItem: Item, pivot: Pivot): Boolean {
     val newCenterY = pivot.y + newItemDimension.depth / 2
     val newCenterZ = pivot.z + newItemDimension.height / 2
 
-    val differenceX = kotlin.math.max(currentCenterX, newCenterX) - kotlin.math.min(currentCenterX, newCenterX)
-    val differenceY = kotlin.math.max(currentCenterY, newCenterY) - kotlin.math.min(currentCenterY, newCenterY)
-    val differenceZ = kotlin.math.max(currentCenterZ, newCenterZ) - kotlin.math.min(currentCenterZ, newCenterZ)
+    val differenceX = max(currentCenterX, newCenterX) - min(currentCenterX, newCenterX)
+    val differenceY = max(currentCenterY, newCenterY) - min(currentCenterY, newCenterY)
+    val differenceZ = max(currentCenterZ, newCenterZ) - min(currentCenterZ, newCenterZ)
 
     val xIntersect = differenceX < (currentItemDimension.width + newItemDimension.width) / 2
     val yIntersect = differenceY < (currentItemDimension.depth + newItemDimension.depth) / 2
@@ -26,6 +28,5 @@ fun intersect(currentItem: Item, newItem: Item, pivot: Pivot): Boolean {
 }
 
 fun setToDecimal(value: Double, numberOfDecimals: Int): Double {
-    val formatted: String = String.format("%.${numberOfDecimals.toString()}f", value)
-    return formatted.toDouble()
+    return String.format("%.${numberOfDecimals}f", value).toDouble()
 }

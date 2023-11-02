@@ -7,16 +7,17 @@ data class Item(
     val skuId: String,
     val location: String,
     val name: String,
-    private val length: Length = Length(-1.0, -1.0, -1.0),
+    private val length: Length,
     var weight: Double,
     var quantity: Int,
-    val workId: String
+    val workId: String,
 ) {
-    //아이템 프로퍼티
-    private var rotationType: RotationType = RotationType.LONGER_DEPTH // default: depth is longer than width
-    var position: Pivot = Pivot(-1.0, -1.0, -1.0)
-    var cbm: Cbm = Cbm(-1.0, -1.0, -1.0)
-    private val numberOfDecimals: Int = DEFAULT_NUMBER_OF_DECIMALS
+
+    private var rotationType = RotationType.DEPTH_IS_LONGER_WIDTH
+    private val numberOfDecimals = DEFAULT_NUMBER_OF_DECIMALS
+
+    lateinit var position: Pivot
+    lateinit var cbm: Cbm
 
     data class Length(
         val length1: Double,
@@ -33,60 +34,47 @@ data class Item(
     data class Pivot(
         val x: Double,
         val y: Double,
-        val z: Double
+        val z: Double,
     )
 
-    fun setDimension() {
-        var dimension = listOf(length.length1, length.length2, length.length3)
-        dimension = dimension.sortedWith(Comparator<Double>{ a, b ->
-            when {
-                a > b -> -1
-                a < b -> 1
-                else -> 0
-            }
-        })
-        this.cbm = Cbm(dimension[1], dimension[0], dimension[2])
-    } // width, depth, height 확정
 
     fun getDimension(): Cbm {
         return Cbm(this.cbm.width, this.cbm.depth, this.cbm.height)
     }
 
-    fun formatNumbers(numberOfDecimals: Int) {
-        val width = setToDecimal(this.cbm.width, numberOfDecimals)
-        val height = setToDecimal(this.cbm.height, numberOfDecimals)
-        val depth = setToDecimal(this.cbm.depth, numberOfDecimals)
-        this.weight = setToDecimal(this.weight, numberOfDecimals)
-
-        this.cbm = Cbm(width, depth, height)
-    } // 아이템 정보 가공
-
-    fun widthDepthSwitch() {
-        this.cbm = Cbm(this.cbm.depth, this.cbm.width, this.cbm.height)
-
-        if (rotationType == RotationType.LONGER_DEPTH){
-            rotationType = RotationType.LONGER_WIDTH
-        }
-        else if(rotationType == RotationType.LONGER_WIDTH){
-            rotationType = RotationType.LONGER_DEPTH
-        }
-    }
-
     fun getVolume(): Double {
         val volume = this.cbm.width * this.cbm.height * this.cbm.depth
         return setToDecimal(volume, this.numberOfDecimals)
-    } // 부피 반환
+    }
 
-    fun getArea(): Double{
+    //밑면 면적 반환
+    fun getArea(): Double {
         val area = this.cbm.width * this.cbm.depth
         return setToDecimal(area, this.numberOfDecimals)
-    } //밑면 면적 반환
-
-    /*
-    fun copy(): Item {
-        return Item(skuId, location, name, Length(this.cbm.width, this.cbm.height, this.cbm.depth), weight, quantity, workId)
     }
-    */
+
+    // width, depth, height 확정
+    fun setDimension() {
+        var dimension = listOf(length.length1, length.length2, length.length3)
+        dimension = dimension.sortedWith { a, b ->
+            when {
+                a > b -> -1
+                a < b -> 1
+                else -> 0
+            }
+        }
+        this.cbm = Cbm(dimension[1], dimension[0], dimension[2])
+    }
+
+    fun swapWidthDepth() {
+        this.cbm = Cbm(this.cbm.depth, this.cbm.width, this.cbm.height)
+
+        if (rotationType == RotationType.DEPTH_IS_LONGER_WIDTH) {
+            rotationType = RotationType.WIDTH_IS_LONGER_DEPTH
+        } else if (rotationType == RotationType.WIDTH_IS_LONGER_DEPTH) {
+            rotationType = RotationType.DEPTH_IS_LONGER_WIDTH
+        }
+    }
 
     override fun toString(): String {
         return "Item(skuId='$skuId', location='$location', name='$name'," +

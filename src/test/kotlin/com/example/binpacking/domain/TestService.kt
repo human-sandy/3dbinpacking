@@ -289,7 +289,7 @@ class TestService {
         packingTotes.totes.forEach { tote ->
             //println("===================== [" + tote.name + "] =====================")
             val loadFactor = setToDecimal(
-                (1 - (tote.availSpace / (tote.width * tote.depth * tote.height))) * 100,
+                (1 - (tote.remainVolume / (tote.width * tote.depth * tote.height))) * 100,
                 DEFAULT_NUMBER_OF_DECIMALS
             )
             //println("Load factor: $loadFactor %")

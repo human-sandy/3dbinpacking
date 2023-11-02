@@ -1,6 +1,5 @@
 package com.example.binpacking.service
 
-import com.example.binpacking.entity.Item
 enum class Algorithm {
     FFD, BFD, MFK
 }
@@ -18,7 +17,7 @@ class AlgorithmService {
                 if (tote.putItem(item)) {
                     tote.items.add(item)
                     packed = true
-                    tote.availSpace -= item.getVolume()
+                    tote.remainVolume -= item.getVolume()
                     break
                 } else tote.unfittedItems.add(item)
             }
@@ -28,7 +27,7 @@ class AlgorithmService {
                     this.addTote()
                     this.totes.last().putItem(item)
                     this.totes.last().items.add(item)
-                    this.totes.last().availSpace -= item.getVolume()
+                    this.totes.last().remainVolume -= item.getVolume()
                 }
             }
         }
@@ -43,13 +42,13 @@ class AlgorithmService {
             }
             var packed = false
 
-            singleItemPackingTote.totes.sortBy { it.availSpace }
+            singleItemPackingTote.totes.sortBy { it.remainVolume }
 
             for (tote in singleItemPackingTote.totes) {
                 if (tote.putItem(item)) {
                     tote.items.add(item)
                     packed = true
-                    tote.availSpace -= item.getVolume()
+                    tote.remainVolume -= item.getVolume()
                     break
                 } else tote.unfittedItems.add(item)
             }
@@ -59,12 +58,10 @@ class AlgorithmService {
                     this.addTote()
                     this.totes.last().putItem(item)
                     this.totes.last().items.add(item)
-                    this.totes.last().availSpace -= item.getVolume()
+                    this.totes.last().remainVolume -= item.getVolume()
                 }
             }
         }
-
-
     }
 
     fun packingWithMFK(
@@ -82,7 +79,7 @@ class AlgorithmService {
                     if (packingItem.items.isNotEmpty()) {
                         if (this.putItem(packingItem.items.first())) {
                             val item = packingItem.items.removeFirst()
-                            this.availSpace -= item.getVolume()
+                            this.remainVolume -= item.getVolume()
                             tote.items.add(item)
                         } else break
                     } else break }
@@ -90,7 +87,7 @@ class AlgorithmService {
                 while (packingItem.items.isNotEmpty()) {
                     if(this.putItem(packingItem.items.last())) {
                         val item = packingItem.items.removeLast()
-                        this.availSpace -= item.getVolume()
+                        this.remainVolume -= item.getVolume()
                         tote.items.add(item)
                     } else break
                 }
