@@ -1,25 +1,29 @@
 package com.example.binpacking
 
 import com.example.binpacking.entity.Item
-import com.example.binpacking.entity.Item.Pivot as Pivot
+import kotlin.math.max
+import kotlin.math.min
+import com.example.binpacking.entity.Item.Point as Pivot
 
-fun intersect(currentItem: Item, newItem: Item, pivot: Pivot): Boolean {
-    val currentItemDimension = currentItem.getDimension()
+
+fun intersect(existingItem: Item, newItem: Item, point: Pivot): Boolean {
+    val existingItemDimension = existingItem.getDimension()
     val newItemDimension = newItem.getDimension()
-    val currentCenterX = currentItem.position.x + currentItemDimension.width / 2
-    val currentCenterY = currentItem.position.y + currentItemDimension.depth / 2
-    val currentCenterZ = currentItem.position.z + currentItemDimension.height / 2
-    val newCenterX = pivot.x + newItemDimension.width / 2
-    val newCenterY = pivot.y + newItemDimension.depth / 2
-    val newCenterZ = pivot.z + newItemDimension.height / 2
 
-    val differenceX = kotlin.math.max(currentCenterX, newCenterX) - kotlin.math.min(currentCenterX, newCenterX)
-    val differenceY = kotlin.math.max(currentCenterY, newCenterY) - kotlin.math.min(currentCenterY, newCenterY)
-    val differenceZ = kotlin.math.max(currentCenterZ, newCenterZ) - kotlin.math.min(currentCenterZ, newCenterZ)
+    val existingCenterX = existingItem.position.x + existingItemDimension.width / 2
+    val existingCenterY = existingItem.position.y + existingItemDimension.depth / 2
+    val existingCenterZ = existingItem.position.z + existingItemDimension.height / 2
+    val newCenterX = point.x + newItemDimension.width / 2
+    val newCenterY = point.y + newItemDimension.depth / 2
+    val newCenterZ = point.z + newItemDimension.height / 2
 
-    val xIntersect = differenceX < (currentItemDimension.width + newItemDimension.width) / 2
-    val yIntersect = differenceY < (currentItemDimension.depth + newItemDimension.depth) / 2
-    val zIntersect = differenceZ < (currentItemDimension.height + newItemDimension.height) / 2
+    val differenceX = max(existingCenterX, newCenterX) - min(existingCenterX, newCenterX)
+    val differenceY = max(existingCenterY, newCenterY) - min(existingCenterY, newCenterY)
+    val differenceZ = max(existingCenterZ, newCenterZ) - min(existingCenterZ, newCenterZ)
+
+    val xIntersect = differenceX < (existingItemDimension.width + newItemDimension.width) / 2
+    val yIntersect = differenceY < (existingItemDimension.depth + newItemDimension.depth) / 2
+    val zIntersect = differenceZ < (existingItemDimension.height + newItemDimension.height) / 2
 
     return xIntersect && yIntersect && zIntersect
 

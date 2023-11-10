@@ -10,7 +10,7 @@ class PackingService {
     val singleItemPackingTote = PackingTote()
 
     class PackingTote {
-        val totes: MutableList<Tote> = mutableListOf()
+        val totes = mutableListOf<Tote>()
         private val toteSpec = ToteSpec(0.0)
 
         fun addTote() {
@@ -27,13 +27,14 @@ class PackingService {
     }
 
     class PackingItem {
-        val items: MutableList<Item> = mutableListOf()
+        val items = mutableListOf<Item>()
 
         fun addItem(item: Item) {
             for (index in 0 until item.quantity) {
                 // item 개별 확인용
                 val individualItem = item.copy()
                 individualItem.setDimension()
+
                 items.add(individualItem)
             }
         }
