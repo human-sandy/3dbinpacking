@@ -1,42 +1,35 @@
 package com.example.binpacking
 
 import com.example.binpacking.entity.Item
-import java.math.BigDecimal
-import java.math.RoundingMode
+import kotlin.math.max
+import kotlin.math.min
+import com.example.binpacking.entity.Item.Point as Pivot
 
-fun intersect(firstItem: Item, secondItem: Item, pivot:List<Double>): Boolean {
-    val firstDimension = firstItem.getDimension()
-    val secondDimension = secondItem.getDimension()
 
-    val firstCurrentX = firstItem.position[0] + firstDimension[0] / 2
-    val firstCurrentY = firstItem.position[1] + firstDimension[1] / 2
-    val firstCurrentZ = firstItem.position[2] + firstDimension[2] / 2
-    val secondCurrentX = pivot[0] + secondDimension[0] / 2
-    val secondCurrentY = pivot[1] + secondDimension[1] / 2
-    val secondCurrentZ = pivot[2] + secondDimension[2] / 2
+fun intersect(existingItem: Item, newItem: Item, point: Pivot): Boolean {
+    val existingItemDimension = existingItem.getDimension()
+    val newItemDimension = newItem.getDimension()
 
-    val differenceX = kotlin.math.max(firstCurrentX, secondCurrentX) - kotlin.math.min(firstCurrentX, secondCurrentX)
-    val differenceY = kotlin.math.max(firstCurrentY, secondCurrentY) - kotlin.math.min(firstCurrentY, secondCurrentY)
-    val differenceZ = kotlin.math.max(firstCurrentZ, secondCurrentZ) - kotlin.math.min(firstCurrentZ, secondCurrentZ)
+    val existingCenterX = existingItem.position.x + existingItemDimension.width / 2
+    val existingCenterY = existingItem.position.y + existingItemDimension.depth / 2
+    val existingCenterZ = existingItem.position.z + existingItemDimension.height / 2
+    val newCenterX = point.x + newItemDimension.width / 2
+    val newCenterY = point.y + newItemDimension.depth / 2
+    val newCenterZ = point.z + newItemDimension.height / 2
 
-    val x = differenceX < (firstDimension[0] + secondDimension[0])/2
-    val y = differenceY < (firstDimension[1] + secondDimension[1])/2
-    val z = differenceZ < (firstDimension[2] + secondDimension[2])/2
+    val differenceX = max(existingCenterX, newCenterX) - min(existingCenterX, newCenterX)
+    val differenceY = max(existingCenterY, newCenterY) - min(existingCenterY, newCenterY)
+    val differenceZ = max(existingCenterZ, newCenterZ) - min(existingCenterZ, newCenterZ)
 
-    val bool = x && y && z
+    val xIntersect = differenceX < (existingItemDimension.width + newItemDimension.width) / 2
+    val yIntersect = differenceY < (existingItemDimension.depth + newItemDimension.depth) / 2
+    val zIntersect = differenceZ < (existingItemDimension.height + newItemDimension.height) / 2
 
-    return bool
+    return xIntersect && yIntersect && zIntersect
 
-} // 모든 차원의 지점이 교차하는지 확인해서 두 물건이 교차하는지 여부 반환
-
-fun getLimitNumberOfDecimals(numberOfDecimals: Int): Int {
-    return BigDecimal("1.${"0".repeat(numberOfDecimals)}").toInt()
 }
 
 fun setToDecimal(value: Double, numberOfDecimals: Int): Double {
-    val limitDecimal = getLimitNumberOfDecimals(numberOfDecimals)
-    val roundingValue = BigDecimal(value).setScale(limitDecimal - 1, RoundingMode.HALF_EVEN)
-    // 아이템 정보 반올림해서
-
-    return roundingValue.toDouble()
+    val formatted: String = String.format("%.${numberOfDecimals.toString()}f", value)
+    return formatted.toDouble()
 }

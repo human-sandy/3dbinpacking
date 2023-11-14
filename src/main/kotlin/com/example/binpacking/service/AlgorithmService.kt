@@ -1,6 +1,5 @@
 package com.example.binpacking.service
 
-import com.example.binpacking.entity.Item
 enum class Algorithm {
     FFD, BFD, MFK
 }
@@ -9,16 +8,17 @@ class AlgorithmService {
     fun packingWithFFD(singleItemPackingTote: PackingService.PackingTote, packingItem: PackingService.PackingItem) {
 
         packingItem.items.map { item ->
+            var packed = false
+
             if (singleItemPackingTote.totes.isEmpty()) {
                 singleItemPackingTote.addTote()
             }
-            var packed = false
 
             for (tote in singleItemPackingTote.totes) {
                 if (tote.putItem(item)) {
-                    tote.items.add(item)
                     packed = true
-                    tote.availSpace -= item.getVolume()
+                    tote.items.add(item)
+                    tote.remainedVolume -= item.getVolume()
                     break
                 } else tote.unfittedItems.add(item)
             }
@@ -27,29 +27,29 @@ class AlgorithmService {
                 with(singleItemPackingTote) {
                     this.addTote()
                     this.totes.last().putItem(item)
-                    this.totes.last().availSpace -= item.getVolume()
                     this.totes.last().items.add(item)
+                    this.totes.last().remainedVolume -= item.getVolume()
                 }
             }
         }
     }
 
-
     fun packingWithBFD(singleItemPackingTote: PackingService.PackingTote, packingItem: PackingService.PackingItem) {
 
         packingItem.items.map { item ->
+            var packed = false
+
             if (singleItemPackingTote.totes.isEmpty()) {
                 singleItemPackingTote.addTote()
             }
-            var packed = false
 
-            singleItemPackingTote.totes.sortedBy { it.availSpace }
+            singleItemPackingTote.totes.sortBy { it.remainedVolume }
 
             for (tote in singleItemPackingTote.totes) {
                 if (tote.putItem(item)) {
-                    tote.items.add(item)
                     packed = true
-                    tote.availSpace -= item.getVolume()
+                    tote.items.add(item)
+                    tote.remainedVolume -= item.getVolume()
                     break
                 } else tote.unfittedItems.add(item)
             }
@@ -58,13 +58,11 @@ class AlgorithmService {
                 with(singleItemPackingTote) {
                     this.addTote()
                     this.totes.last().putItem(item)
-                    this.totes.last().availSpace -= item.getVolume()
                     this.totes.last().items.add(item)
+                    this.totes.last().remainedVolume -= item.getVolume()
                 }
             }
         }
-
-
     }
 
     fun packingWithMFK(
@@ -72,28 +70,30 @@ class AlgorithmService {
         packingItem: PackingService.PackingItem,
         k: Int
     ) {
-
-        while (packingItem.items.size != 0) {
+        while (packingItem.items.isNotEmpty()) {
             singleItemPackingTote.addTote()
             val tote = singleItemPackingTote.totes.last()
 
-            with(tote) {
-                for (i in 0 until k) {
-                    if (packingItem.items.isNotEmpty()) {
-                        if (this.putItem(packingItem.items.first())) {
-                            val item = packingItem.items.removeFirst()
-                            this.availSpace -= item.getVolume()
-                            tote.items.add(item)
-                        } else break
-                    } else break }
+            // k개의 큰 아이템 선적재
+            for (i in 0 until k) {
+                if (packingItem.items.isEmpty()) break
 
-                while (packingItem.items.isNotEmpty()) {
-                    if(this.putItem(packingItem.items.last())) {
-                        val item = packingItem.items.removeLast()
-                        this.availSpace -= item.getVolume()
-                        tote.items.add(item)
-                    } else break
-                }
+                val item = packingItem.items.first()
+                if (tote.putItem(item)) {
+                    packingItem.items.removeFirst()
+                    tote.items.add(item)
+                    tote.remainedVolume -= item.getVolume()
+                } else break
+            }
+
+            // 남은 공간에 작은 아이템 가능한 만큼 적재
+            while (packingItem.items.isNotEmpty()) {
+                val item = packingItem.items.last()
+                if (tote.putItem(item)) {
+                    packingItem.items.removeLast()
+                    tote.items.add(item)
+                    tote.remainedVolume -= item.getVolume()
+                } else break
             }
         }
     }
