@@ -11,7 +11,7 @@ class PickingSku(var skuUid: String, var quantity: Int)
 class Picking(var workGroupUid: String, var pickingSku: PickingSku)
 
 
-class BinpackingResult(val clusterPicking: PackingService, val groupPicking: MutableList<PackingService>)
+class BinpackingResult(val groupPicking: MutableList<PackingService>)
 
 class ClusterSet(val clusters: List<ClusterInfo>, val fileName: String)
 
