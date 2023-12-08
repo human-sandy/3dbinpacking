@@ -9,7 +9,7 @@ class PackingService {
     val packingItem = PackingItem()
     val singleItemPackingTote = PackingTote()
 
-    class PackingTote {
+    data class PackingTote(val none: Int = 0) {
         val totes = mutableListOf<Tote>()
         private val toteSpec = ToteSpec(0.0)
 
@@ -26,7 +26,7 @@ class PackingService {
         }
     }
 
-    class PackingItem {
+    data class PackingItem(val none: Int = 0) {
         val items = mutableListOf<Item>()
 
         fun addItem(item: Item) {

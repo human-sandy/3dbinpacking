@@ -2,7 +2,18 @@ package com.example.binpacking.service
 
 class CbmwInfo(var width: Double, var height: Double, var depth: Double, var weight: Double)
 
-class SkuInfo(var skuUid: String, var quantity: Int, var locationCode: String, var cbmw: CbmwInfo)
+class SkuInfo(
+    val skuUid: String,
+    val quantity: Int,
+    val locationCode: String,
+    var cbmw: CbmwInfo,
+    var x: Double,
+    var y: Double,
+
+    var position: Position<Double>
+)
+
+data class Position<T : Number>(val x: T, val y: T)
 
 class WorkGroupInfo(var workGroupUid: String, var skus: MutableList<SkuInfo>)
 
