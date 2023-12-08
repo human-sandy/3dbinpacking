@@ -3,7 +3,7 @@ package com.example.binpacking.entity
 import com.example.binpacking.entity.Item.Point
 import com.example.binpacking.intersect
 
-class Tote(
+data class Tote(
     val name: String,
     val width: Double,
     val height: Double,
